@@ -21,7 +21,7 @@ def make_fields(entities_registry) -> list:
         (
             config.table_name,
             Dict[UUID, class_],
-            field(default_factory=lambda: {})
+            field(default_factory=lambda: {})  # pylint: disable=invalid-field-call
         ) for class_, config in entities_registry.all_configs()
     ]
 

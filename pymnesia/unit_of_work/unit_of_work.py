@@ -36,7 +36,7 @@ class UnitOfWork(OriginatorInterface):
 
     def save(self) -> UnitOfWorkMemento:
         self.state = deepcopy(self.replica.state)
-        for entity_class, config in registry.all_configs():
+        for entity_class, config in registry.all_configs():  # pylint: disable=unused-variable
             setattr(self, config.table_name, deepcopy(getattr(self.replica, config.table_name)))
 
         memento = UnitOfWorkMemento(
