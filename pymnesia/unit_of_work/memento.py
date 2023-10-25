@@ -14,6 +14,7 @@ def make_fields(entities_registry) -> list:
     """
     Makes the required fields for UnitOfWorkMemento, based on the registered entities
     :param entities_registry: The registry to use for build.
+
     :return: A list of fields.
     """
     fields = [("state", int)]
