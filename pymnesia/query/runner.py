@@ -18,7 +18,12 @@ class QueryRunner:
             results = arg(results)()
         if limit:
             return results[0:limit]
+
         return results
 
-    def fetch_one(self):
-        return self.__results()[0]
+    def fetch_one(self, *args):
+        results = self.__results()
+        for arg in args:
+            results = arg(results)()
+
+        return results[0]

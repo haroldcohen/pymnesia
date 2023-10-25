@@ -25,7 +25,7 @@ class Query:
         )
 
     def fetch_one(self):
-        return self.__query_runner.fetch_one()
+        return self.__query_runner.fetch_one(*self.__query_functions)
 
     def where(self, clause: dict):
         self.__query_functions.append(curried_filter_results(clause=clause))

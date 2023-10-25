@@ -7,10 +7,13 @@ __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_
 
 
 @pytest.fixture()
-def expected_entity(request, expected_unit_of_work_memento):
+def expected_entity(request, expected_unit_of_work_memento, use_properties):
     """Returns an entity instance to be used for assertion (and action as well)."""
     if hasattr(request, "param"):
         entity = request.param
+        if len(use_properties):
+            for prop, value in use_properties.items():
+                setattr(entity, prop, value)
         table = getattr(expected_unit_of_work_memento, entity.config.table_name)
         table[entity.id] = entity
 
