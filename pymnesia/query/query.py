@@ -1,5 +1,6 @@
 """Provides with Query class.
 """
+from pymnesia.query.functions.filter import curried_filter_results
 from pymnesia.query.functions.order_by import curried_order_by
 from pymnesia.query.runner import QueryRunner
 from pymnesia.unit_of_work.memento import UnitOfWorkMemento
@@ -26,8 +27,14 @@ class Query:
     def fetch_one(self):
         return self.__query_runner.fetch_one()
 
+    def where(self, clause: dict):
+        self.__query_functions.append(curried_filter_results(clause=clause))
+
+        return self
+
     def order_by(self, direction: str, order_by_key: str):
         self.__query_functions.append(curried_order_by(direction=direction, order_by_key=order_by_key))
+
         return self
 
     def limit(self, limit: int):
