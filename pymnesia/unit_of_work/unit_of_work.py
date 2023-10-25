@@ -27,7 +27,7 @@ class UnitOfWork(OriginatorInterface):
         self.__setup()
 
     def __setup(self):
-        for entity_class, config in registry.all_configs():
+        for entity_class, config in registry.all_configs():  # pylint: disable=unused-variable
             self.__dict__[config.table_name] = {}
 
     def save_entity(self, entity):
@@ -60,7 +60,7 @@ class UnitOfWork(OriginatorInterface):
         :return: A query engine instantiated with the current unit of work state.
         """
         tables = {}
-        for entity_class, config in registry.all_configs():
+        for entity_class, config in registry.all_configs():  # pylint: disable=unused-variable
             tables[config.table_name] = deepcopy(getattr(self, config.table_name))
 
         return QueryEngine(
