@@ -117,6 +117,12 @@ def test_query_and_fetch_with_a_where_clause_should_return_a_number_of_filtered_
              InMemoryProduct(id=uuid4(), name="Framework laptop 16 inches"),
              InMemoryProduct(id=uuid4(), name="Framework laptop 13 inches"),
          ]),
+        ([
+             InMemoryProduct(id=uuid4())
+         ], {"name::in": ["iPhone 14", "Galaxy 13"]}, {}, [
+             InMemoryProduct(id=uuid4(), name="iPhone 14"),
+             InMemoryProduct(id=uuid4(), name="Galaxy 13")
+         ]),
     ],
     indirect=True,
 )
@@ -224,4 +230,3 @@ def test_query_and_fetch_with_a_where_clause_and_limit_should_return_a_limited_n
         result,
         equal_to(expected_entities)
     )
-    pass

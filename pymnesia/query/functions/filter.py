@@ -44,17 +44,21 @@ def filter_match(entities: list, field: str, value):
     return list(filter(lambda e: re.match(value, getattr(e, field)), entities))
 
 
+@register_filter_func(filter_name="in")
+def filter_in(entities: list, field: str, value):
+    return list(filter(lambda e: getattr(e, field) in value, entities))
+
+
 def filter_results(entities: list, clause: dict):
     result = entities
     for condition, value in clause.items():
-        split_condition = condition.split("::")
         matched_condition = re.match(r'^(?P<field>\w+)::(?P<operator>\w+)$', condition)
         if matched_condition:
             result = FILTER_FUNCTIONS_REGISTRY[matched_condition.group("operator")](result,
                                                                                     matched_condition.group("field"),
                                                                                     value)
         else:
-            result = list(filter(lambda e: getattr(e, split_condition[0]) == value, result))
+            result = list(filter(lambda e: getattr(e, condition) == value, result))
 
     return result
 
