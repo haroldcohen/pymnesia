@@ -23,7 +23,7 @@ from tests.common_utils.fixtures.misc import *
     ],
     indirect=True,
 )
-def test_query_and_fetch_one_with_a_where_clause_should_return_a_single_filtered_entities(
+def test_query_and_fetch_one_with_a_where_clause_should_return_a_single_filtered_entity(
         time_ns,
         mocked_time_ns,
         unit_of_work,

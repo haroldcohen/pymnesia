@@ -27,31 +27,52 @@ class QueryRunner:
 
         return list(compose_query_funcs(self.__entities()))
 
-    def fetch(self, *args, limit: int):
+    def __run_or_funcs(self, *or_func_groups):
+        """
+        Runs the query functions passed when fetch methods are called.
+        :param query_funcs: The query functions to run.
+        :return: A list of results where filter, order by functions may have been run.
+        """
+        or_results = []
+        for or_functions in or_func_groups:
+            compose_or_funcs = composite(*or_functions)
+            or_results.extend(list(compose_or_funcs(self.__entities())))
+
+        return or_results
+
+    def fetch(self, *args, or_function_groups: list, order_by_functions: list, limit: int) -> list:
         """
         Returns multiple results based on a series of parameters,
         such as a where clause, a limit, and order_by, etc...
         :param args: The query functions to run.
+        :param or_function_groups: The or function groups to run.
+        :param order_by_functions: The limit to use.
         :param limit: The limit to use.
         :return: A list of entities
         """
         results = self.__entities()
         if len(args):
             results = self.__run_query_funcs(*args)
+        results += self.__run_or_funcs(*or_function_groups)
+        if len(order_by_functions):
+            compose_order_by_funcs = composite(*order_by_functions)
+            results = compose_order_by_funcs(results)
         if limit:
             return results[0:limit]
 
         return results
 
-    def fetch_one(self, *args):
+    def fetch_one(self, *args, or_function_groups: list):
         """
         Returns the first result of a query based on a series of parameters,
         such as a where clause, an order_by, etc...
         :param args: The query functions to run.
+        :param or_function_groups: The query functions to run.
         :return: A single entity
         """
         results = self.__entities()
         if len(args):
             results = self.__run_query_funcs(*args)
+        results += self.__run_or_funcs(*or_function_groups)
 
         return results[0]

@@ -3,7 +3,7 @@
 import pytest
 
 __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
-           "where_clause"]
+           "where_clause", "or_clauses"]
 
 
 @pytest.fixture()
@@ -74,3 +74,10 @@ def where_clause(request):
     if hasattr(request, "param"):
         return request.param
     return {}
+
+
+@pytest.fixture()
+def or_clauses(request):
+    if hasattr(request, "param"):
+        return request.param
+    return []

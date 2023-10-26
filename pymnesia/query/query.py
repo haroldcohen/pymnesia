@@ -1,13 +1,14 @@
 """Provides with Query class.
 """
 import re
+from typing import Callable
 
 from pymnesia.composition import runner
 from pymnesia.query.filter.registry import FILTER_FUNCTIONS_REGISTRY
-from pymnesia.query.filter.functions import *
 from pymnesia.query.functions import order_by
 from pymnesia.query.runner import QueryRunner
 from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+from pymnesia.query.filter.functions import *
 
 
 class Query:
@@ -24,20 +25,19 @@ class Query:
         )
         self.__limit = 0
         self.__query_functions = []
+        self.__or_functions = []
+        self.__order_by_functions = []
 
-    def fetch(self):
+    def fetch(self) -> list:
         """
         Returns multiple results based on a series of parameters,
         such as a where clause, a limit, and order_by, etc...
         :return: A list of entities
         """
-        if len(self.__query_functions):
-            return self.__query_runner.fetch(
-                *self.__query_functions,
-                limit=self.__limit
-            )
         return self.__query_runner.fetch(
             *self.__query_functions,
+            or_function_groups=self.__or_functions,
+            order_by_functions=self.__order_by_functions,
             limit=self.__limit
         )
 
@@ -47,20 +47,55 @@ class Query:
         such as a where clause, an order_by, etc...
         :return: A single entity
         """
-        if len(self.__query_functions):
-            return self.__query_runner.fetch_one(
-                *self.__query_functions,
-            )
-
-        return self.__query_runner.fetch_one()
+        return self.__query_runner.fetch_one(
+            *self.__query_functions,
+            or_function_groups=self.__or_functions,
+        )
 
     def where(self, clause: dict):
         """
-        Processes and stores the parameters for a where clause.
+        Processes and stores the parameters for a 'where' clause.
         Each condition in the where clause is matched with a filter function.
         :param clause: The where clause to use for the query.
         :return: The query to use for chaining.
         """
+        self.__query_functions.extend(self.__build_filter_composite_funcs(clause))
+
+        return self
+
+    def where_with_composition(self, filter_funcs: list[Callable]):
+        """
+        Adds composite functions to be used as conditional filters.
+        :param filter_funcs: A list of callables matching the Pymnesia filter API.
+        :return: The query to use for chaining.
+        """
+        self.__query_functions.extend(filter_funcs)
+
+        return self
+
+    def or_(self, clause: dict):
+        """
+        Processes and stores parameters for 'or' clauses.
+        :param clause: The or clause to use for the query. This clause is to be considered as an 'or and', meaning that
+        every parameter passed will be processed as additional filter.
+        Eg:
+            query().orders().where({"status":"shipped"}).or_({"status":"ready_to_ship", "is_paid": True}).fetch()
+            will return all the entities that have a status "shipped" or the ones
+            that have a status "ready_to_ship" AND are paid.
+        :return: The query to use for chaining.
+        """
+        self.__or_functions.append(self.__build_filter_composite_funcs(clause))
+
+        return self
+
+    @staticmethod
+    def __build_filter_composite_funcs(clause: dict) -> list[Callable]:
+        """
+        Builds partial/composite functions to use for where/or clauses.
+        :param clause: The clause to build the functions from.
+        :return: A list of composite callables.
+        """
+        filter_funcs = []
         for condition, value in clause.items():
             matched_condition = re.match(r'^(?P<field>\w+)::(?P<operator>\w+)$', condition)
             if matched_condition:
@@ -69,22 +104,22 @@ class Query:
             else:
                 filter_func = FILTER_FUNCTIONS_REGISTRY["eq"]
                 field = condition
-            self.__query_functions.append(runner(
+            filter_funcs.append(runner(
                 filter_func,
                 field=field,
                 value=value,
             ))
 
-        return self
+        return filter_funcs
 
     def order_by(self, direction: str, order_by_key: str):
         """
-        Orders (sort) a query result by a key.
-        :param direction: Whether the result should be ordered by in an ascending or descending way.
+        Stores parameters to use for ordering (sorting) a query result by a key.
+        :param direction: Whether the result should be ordered by in an ascending or descending manner.
         :param order_by_key: The property to use for ordering.
         :return: The query to use for chaining.
         """
-        self.__query_functions.append(runner(
+        self.__order_by_functions.append(runner(
             order_by,
             direction=direction,
             order_by_key=order_by_key,

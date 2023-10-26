@@ -21,7 +21,7 @@ def filter_eq(entities: Iterable, field: str, value: Any) -> filter:
 
 
 @register_filter_func(filter_name="not")
-def filter_not(entities: Iterable, field: str, value: Any):
+def filter_not(entities: Iterable, field: str, value: Any) -> filter:
     """
     Filters entities whose field is not equal to a given value.
     :param entities: The entities to filter.
@@ -33,7 +33,7 @@ def filter_not(entities: Iterable, field: str, value: Any):
 
 
 @register_filter_func(filter_name="gt")
-def filter_greater_than(entities: Iterable, field: str, value: Union[str, int, type(datetime)]):
+def filter_greater_than(entities: Iterable, field: str, value: Union[str, int, type(datetime)]) -> filter:
     """
     Filters entities whose field is greater than a given value.
     :param entities: The entities to filter.
@@ -45,7 +45,7 @@ def filter_greater_than(entities: Iterable, field: str, value: Union[str, int, t
 
 
 @register_filter_func(filter_name="gte")
-def filter_greater_than_or_equal(entities: Iterable, field: str, value: Union[str, int, type(datetime)]):
+def filter_greater_than_or_equal(entities: Iterable, field: str, value: Union[str, int, type(datetime)]) -> filter:
     """
     Filters entities whose field is greater than or equal to a given value.
     :param entities: The entities to filter.
@@ -57,7 +57,7 @@ def filter_greater_than_or_equal(entities: Iterable, field: str, value: Union[st
 
 
 @register_filter_func(filter_name="lt")
-def filter_less_than(entities: Iterable, field: str, value: Union[str, int, type(datetime)]):
+def filter_less_than(entities: Iterable, field: str, value: Union[str, int, type(datetime)]) -> filter:
     """
     Filters entities whose field is less than a given value.
     :param entities: The entities to filter.
@@ -69,7 +69,7 @@ def filter_less_than(entities: Iterable, field: str, value: Union[str, int, type
 
 
 @register_filter_func(filter_name="lte")
-def filter_less_than_or_equal(entities: Iterable, field: str, value: Union[str, int, type(datetime)]):
+def filter_less_than_or_equal(entities: Iterable, field: str, value: Union[str, int, type(datetime)]) -> filter:
     """
     Filters entities whose field is less than or equal to a given value.
     :param entities: The entities to filter.
@@ -81,7 +81,7 @@ def filter_less_than_or_equal(entities: Iterable, field: str, value: Union[str, 
 
 
 @register_filter_func(filter_name="match")
-def filter_match(entities: Iterable, field: str, value: re.Pattern):
+def filter_match(entities: Iterable, field: str, value: re.Pattern) -> filter:
     """
     Filters entities whose field matches a given value, based on a regular expression, and where re.match is used for
     evaluation.
@@ -94,7 +94,7 @@ def filter_match(entities: Iterable, field: str, value: re.Pattern):
 
 
 @register_filter_func(filter_name="in")
-def filter_in(entities: Iterable, field: str, value: list):
+def filter_in(entities: Iterable, field: str, value: list) -> filter:
     """
     Filters entities whose field's value is in a range of values.
     :param entities: The entities to filter.
