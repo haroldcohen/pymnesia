@@ -8,7 +8,7 @@ from pymnesia.query.filter.registry import FILTER_FUNCTIONS_REGISTRY
 from pymnesia.query.functions import order_by
 from pymnesia.query.runner import QueryRunner
 from pymnesia.unit_of_work.memento import UnitOfWorkMemento
-from pymnesia.query.filter.functions import *
+from pymnesia.query.filter.functions import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
 class Query:

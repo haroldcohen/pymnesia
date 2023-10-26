@@ -51,10 +51,10 @@ class QueryRunner:
         :return: A list of entities
         """
         results = self.__entities()
-        if len(args):
+        if args:
             results = self.__run_query_funcs(*args)
         results += self.__run_or_funcs(*or_function_groups)
-        if len(order_by_functions):
+        if order_by_functions:
             compose_order_by_funcs = composite(*order_by_functions)
             results = compose_order_by_funcs(results)
         if limit:
