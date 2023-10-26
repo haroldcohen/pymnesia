@@ -71,7 +71,7 @@ class QueryRunner:
         :return: A single entity
         """
         results = self.__entities()
-        if len(args):
+        if args:
             results = self.__run_query_funcs(*args)
         results += self.__run_or_funcs(*or_function_groups)
 
