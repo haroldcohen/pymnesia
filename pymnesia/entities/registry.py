@@ -3,7 +3,6 @@
 from dataclasses import make_dataclass, field
 
 from pymnesia.entities.config import EntityConfig
-from pymnesia.entities.exceptions import ConfigIsAReservedKeywordException
 from pymnesia.entities.field import UNDEFINED
 
 
@@ -30,8 +29,6 @@ class PymnesiaRegistry:
             """
             fields = []
             for field_name, field_type in entity_class.__annotations__.items():
-                if field_name == "config":
-                    raise ConfigIsAReservedKeywordException
                 if hasattr(entity_class, field_name):
                     field_as_attr = getattr(entity_class, field_name)
                     dataclass_field_attrs = {}

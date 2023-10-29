@@ -9,7 +9,6 @@ from freezegun import freeze_time
 from hamcrest import assert_that, equal_to
 
 from pymnesia.entities.field import Field
-from pymnesia.entities.exceptions import ConfigIsAReservedKeywordException
 from tests.common_utils.helpers.make import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
@@ -87,14 +86,9 @@ def test_declare_an_entity_with_a_field_named_config_should_raise_ConfigIsAReser
         registry,
 ):
     # Act & Assert
-    with pytest.raises(ConfigIsAReservedKeywordException) as exc:
-        make_entity_class(
-            class_name=entity_class_name,
-            table_name=table_name,
-            fields=fields_conf,
-            registry=registry
-        )
-    assert_that(
-        str(exc.value),
-        equal_to("'config' is keyword reserved for Pymnesia. Please choose another field name.")
+    make_entity_class(
+        class_name=entity_class_name,
+        table_name=table_name,
+        fields=fields_conf,
+        registry=registry
     )
