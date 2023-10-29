@@ -1,12 +1,16 @@
 """Provides with fixtures to build expected entities.
 """
 from dataclasses import fields, MISSING
+from typing import Dict, Union, Tuple
 
 import pytest
 
 __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
            "where_clause", "or_clauses", "expected_entity_attributes", "expected_dataclass_fields",
-           "extracted_entity_class_fields"]
+           "extracted_entity_class_fields", "expected_entity_instance"]
+
+from pymnesia.entities.field import UNDEFINED, Field
+from tests.common_utils.helpers.make import is_type_and_field_tuple
 
 
 @pytest.fixture()
@@ -90,20 +94,25 @@ def or_clauses(request):
 def expected_entity_attributes(fields_conf):
     expected_attrs = {}
     for field_name, field_conf in fields_conf.items():
-        expected_attrs[field_name] = field_conf["type"]
+        if is_type_and_field_tuple(field_conf):
+            expected_attrs[field_name] = field_conf[0]
+        else:
+            expected_attrs[field_name] = field_conf
 
     return expected_attrs
 
 
 @pytest.fixture()
-def expected_dataclass_fields(fields_conf):
+def expected_dataclass_fields(fields_conf: Dict[str, Union[type, Tuple[type, Field]]]):
     expected_fields = []
     for field_name, field_conf in fields_conf.items():
-        expected = {"name": field_name, "type": field_conf["type"]}
-        if field_conf["make_field"]:
-            expected["default"] = field_conf["field"]["default"]
-        else:
-            expected["default"] = MISSING
+        expected = {"name": field_name, "type": field_conf, "default": MISSING, "default_factory": MISSING}
+        if is_type_and_field_tuple(field_conf):
+            field = field_conf[1]
+            expected["type"] = field_conf[0]
+            expected["default"] = field.default if field.default is not UNDEFINED else MISSING
+            expected["default_factory"] = field.default_factory \
+                if field.default_factory is not UNDEFINED else MISSING
         expected_fields.append(expected)
 
     return expected_fields
@@ -117,6 +126,12 @@ def extracted_entity_class_fields(entity_class):
             "name": entity_field.name,
             "type": entity_field.type,
             "default": entity_field.default,
+            "default_factory": entity_field.default_factory,
         })
 
     return fields_to_assert
+
+
+@pytest.fixture()
+def expected_entity_instance(entity_class, instance_values):
+    return entity_class(**instance_values)
