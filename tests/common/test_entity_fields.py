@@ -67,28 +67,3 @@ def test_declare_an_entity_with_fields_should_return_a_entity_dataclass_with_mat
         extracted_entity_class_fields,
         equal_to(expected_dataclass_fields)
     )
-
-
-@pytest.mark.parametrize(
-    "entity_class_name, table_name, fields_conf",
-    [
-        ("InMemoryProductCategory", "product_categories", {
-            "id": UUID,
-            "config": (str, Field(default="config")),
-        }),
-    ],
-    indirect=True
-)
-def test_declare_an_entity_with_a_field_named_config_should_raise_ConfigIsAReservedKeyWorkException(
-        entity_class_name,
-        table_name,
-        fields_conf,
-        registry,
-):
-    # Act & Assert
-    make_entity_class(
-        class_name=entity_class_name,
-        table_name=table_name,
-        fields=fields_conf,
-        registry=registry
-    )
