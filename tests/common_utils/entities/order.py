@@ -15,3 +15,4 @@ class InMemoryOrder:
     total_amount: int = Field(default=0)
 
     vat_not_included_amount: int = Field(default=0)
+

@@ -9,6 +9,7 @@ from freezegun import freeze_time
 from hamcrest import assert_that, equal_to
 
 from pymnesia.entities.field import Field
+from pymnesia.entities.exceptions import ConfigIsAReservedKeywordException
 from tests.common_utils.helpers.make import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
@@ -33,8 +34,8 @@ freezer.start()
         }, {"id": uuid4()}),
         ("InMemoryProductCategory", "product_categories", {
             "id": UUID,
-            "created_at": (datetime.datetime, Field(default_factory=datetime.datetime.now))
-        }, {"id": uuid4()})
+            "created_at": (datetime.datetime, Field(default_factory=datetime.datetime.now)),
+        }, {"id": uuid4()}),
     ],
     indirect=True
 )
@@ -66,4 +67,34 @@ def test_declare_an_entity_with_fields_should_return_a_entity_dataclass_with_mat
     assert_that(
         extracted_entity_class_fields,
         equal_to(expected_dataclass_fields)
+    )
+
+
+@pytest.mark.parametrize(
+    "entity_class_name, table_name, fields_conf",
+    [
+        ("InMemoryProductCategory", "product_categories", {
+            "id": UUID,
+            "config": (str, Field(default="config")),
+        }),
+    ],
+    indirect=True
+)
+def test_declare_an_entity_with_a_field_named_config_should_raise_ConfigIsAReservedKeyWorkException(
+        entity_class_name,
+        table_name,
+        fields_conf,
+        registry,
+):
+    # Act & Assert
+    with pytest.raises(ConfigIsAReservedKeywordException) as exc:
+        make_entity_class(
+            class_name=entity_class_name,
+            table_name=table_name,
+            fields=fields_conf,
+            registry=registry
+        )
+    assert_that(
+        str(exc.value),
+        equal_to("'config' is keyword reserved for Pymnesia. Please choose another field name.")
     )
