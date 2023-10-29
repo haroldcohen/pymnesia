@@ -1,7 +1,7 @@
 """Provides with a metaclass for QueryEngine.
 """
 from pymnesia.query.query import Query
-from pymnesia.registry import registry
+from pymnesia.entities.registry import registry
 
 
 class QueryEngineType(type):
@@ -10,7 +10,6 @@ class QueryEngineType(type):
     """
 
     def __new__(mcs, name, bases, attrs):
-
         def table_maker(entity_class_):
             def table_query_maker(self):
                 return Query(entity_class=entity_class_, unit_of_work=self.unit_of_work)

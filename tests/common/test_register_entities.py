@@ -1,10 +1,8 @@
 """Provides with unit tests to validate entities registry related features.
 """
-from dataclasses import dataclass
-
 from hamcrest import assert_that, equal_to
 
-from pymnesia.registry import PymnesiaRegistry
+from pymnesia.entities.registry import PymnesiaRegistry
 from pymnesia.entities.config import EntityConfig
 
 
@@ -13,7 +11,6 @@ def test_register_orders_should_update_the_entity_registry():
     registry = PymnesiaRegistry()
 
     @registry.entity(table_name="orders")
-    @dataclass
     class InMemoryOrder:
         pass
 
@@ -32,7 +29,6 @@ def test_register_order_lines_should_update_the_entity_registry():
     registry = PymnesiaRegistry()
 
     @registry.entity(table_name="order_lines")
-    @dataclass
     class InMemoryOrderLine:
         pass
 

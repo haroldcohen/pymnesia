@@ -7,7 +7,7 @@ __all__ = ["UnitOfWorkMemento"]
 from typing import Dict
 from uuid import UUID
 
-from pymnesia.registry import registry
+from pymnesia.entities.registry import registry
 
 
 def make_fields(entities_registry) -> list:
