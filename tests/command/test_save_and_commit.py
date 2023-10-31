@@ -12,6 +12,7 @@ from pymnesia.transaction.transaction import InMemoryTransaction
 from tests.common_utils.fixtures.unit_of_work.expected import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.unit_of_work import *
 
 
 @pytest.mark.parametrize(
@@ -25,13 +26,13 @@ from tests.common_utils.fixtures.misc import *
 )
 def test_save_an_entity_and_commit_should_update_unit_of_work_with_an_entity(
         time_ns,
+        unit_of_work,
         mocked_time_ns,
         expected_unit_of_work_memento,
         expected_entity,
 ):
     """Tests whether saving and committing an entity updates the unit of work."""
     # Arrange
-    unit_of_work = UnitOfWork(state=time_ns)
     transaction = InMemoryTransaction(originator=unit_of_work)
 
     # Act
@@ -45,6 +46,10 @@ def test_save_an_entity_and_commit_should_update_unit_of_work_with_an_entity(
         last,
         equal_to(expected_unit_of_work_memento)
     )
+    # assert_that(
+    #     issubclass(type(last), UnitOfWorkMementoInterface),
+    #     equal_to(True)
+    # )
     assert_that(
         retrieved_entity,
         equal_to(expected_entity)
