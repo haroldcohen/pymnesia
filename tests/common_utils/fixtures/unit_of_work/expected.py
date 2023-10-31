@@ -11,7 +11,8 @@ from pymnesia.unit_of_work.memento import UnitOfWorkMemento
 
 @pytest.fixture()
 def expected_unit_of_work_memento() -> UnitOfWorkMemento:
-    """Returns a unit of work memento instance to be used for assertion (and action as well)."""
+    """Returns a unit of work memento instance to be used for assertion (and action as well).
+    """
     memento = UnitOfWorkMemento(
         state=time.time_ns(),
     )

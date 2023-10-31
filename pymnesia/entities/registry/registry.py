@@ -17,12 +17,12 @@ class PymnesiaRegistry:
         entity_class.config = config
         self._entries[entity_class] = config
 
+    def unregister(self, entity_class):
+        del self._entries[entity_class]
+
     def all_configs(self):
         for config in self._entries.items():
             yield config
 
     def find(self, entity_class):
         return self._entries[entity_class]
-
-    def clear(self):
-        self._entries = {}

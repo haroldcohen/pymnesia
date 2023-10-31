@@ -1,29 +1,33 @@
 """Provides with unit tests to validate entities registry related features.
 """
+import datetime
 from dataclasses import is_dataclass
 from uuid import UUID, uuid4
 
-import pytest
 from hamcrest import assert_that, equal_to
 
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.registry import *
 from pymnesia.entities.config import EntityConfig
 from pymnesia.entities.field import Field
 from pymnesia.entities.registry import registry
 
 
-# Temporarily skipping tests since the registry is not cleaned up after each test and disturbs the query test suite
 @pytest.mark.parametrize(
     "entity_class_name, table_name, fields_conf, instance_values",
     [
-        # ("InMemoryInvoice", "invoices", {
-        #     "id": UUID,
-        #     "amount": float,
-        #     "vat_rate": (float, Field(default=5.5)),
-        # }, {"id": uuid4(), "amount": 2.3}),
+        ("InMemoryInvoice", "invoices", {
+            "id": UUID,
+            "amount": float,
+            "vat_rate": (float, Field(default=5.5)),
+        }, {"id": uuid4(), "amount": 2.3}),
+        ("InMemoryOrderLine", "order_lines", {
+            "id": UUID,
+            "customization": (datetime.datetime, Field(default_factory=lambda: {})),
+        }, {"id": uuid4()}),
     ],
     indirect=True,
 )
@@ -38,6 +42,7 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
         expected_entity_attributes,
         expected_dataclass_fields,
         extracted_entity_class_fields,
+        unregister_entity_class,
 ):
     expected_config = EntityConfig(
         table_name=table_name,
@@ -67,4 +72,3 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
         getattr(unit_of_work, table_name),
         equal_to({})
     )
-

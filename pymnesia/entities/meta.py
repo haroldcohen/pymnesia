@@ -23,6 +23,8 @@ class EntityMeta(type):
                 dataclass_field_attrs = {}
                 if field_as_attr.default is not UNDEFINED:
                     dataclass_field_attrs["default"] = field_as_attr.default
+                if field_as_attr.default_factory is not UNDEFINED:
+                    dataclass_field_attrs["default_factory"] = field_as_attr.default_factory
                 fields_to_create.append((
                     field_name,
                     field_type,

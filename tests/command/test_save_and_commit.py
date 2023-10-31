@@ -46,10 +46,6 @@ def test_save_an_entity_and_commit_should_update_unit_of_work_with_an_entity(
         last,
         equal_to(expected_unit_of_work_memento)
     )
-    # assert_that(
-    #     issubclass(type(last), UnitOfWorkMementoInterface),
-    #     equal_to(True)
-    # )
     assert_that(
         retrieved_entity,
         equal_to(expected_entity)
