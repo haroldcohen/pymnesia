@@ -3,13 +3,14 @@
 from uuid import UUID
 
 from pymnesia.entities.field import Field
-from pymnesia.entities.registry import registry
+from pymnesia.entities.base import BaseEntity
 
 __all__ = ["InMemoryProduct"]
 
 
-@registry.entity(table_name="products")
-class InMemoryProduct:
+class InMemoryProduct(BaseEntity):
+    __tablename__ = "products"
+
     id: UUID
 
     name: str = Field(default="Generic product name")

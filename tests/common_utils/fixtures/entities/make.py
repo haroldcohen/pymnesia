@@ -33,20 +33,18 @@ def fields_conf(request) -> Dict[str, Union[Type, Tuple[Type, Field]]]:
 
 
 @pytest.fixture()
-def entity_class(entity_class_name, table_name, fields_conf, registry):
+def entity_class(entity_class_name, table_name, fields_conf):
     """Returns a dynamically made entity class.
 
     :param entity_class_name: The class name to use for making the class.
     :param table_name: The table name under which the entity should be registered.
     :param fields_conf: The fields to make
-    :param registry: The registry in which the entity class should be registered.
     :return: An entity class
     """
     return make_entity_class(
-        class_name=entity_class_name,
+        name=entity_class_name,
         table_name=table_name,
-        fields=fields_conf,
-        registry=registry
+        fields_conf=fields_conf,
     )
 
 
@@ -55,3 +53,14 @@ def instance_values(request):
     """The values to use for instantiating an expected entity instance.
     """
     return request.param
+
+
+@pytest.fixture()
+def expected_entity_instance(entity_class, instance_values):
+    """Returns an expected instance of an entity class based on provided values.
+
+    :param entity_class: The entity class to instantiate.
+    :param instance_values: The values to use.
+    :return: A instance of the provided entity class.
+    """
+    return entity_class(**instance_values)
