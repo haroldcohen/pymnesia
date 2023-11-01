@@ -134,4 +134,10 @@ def extracted_entity_class_fields(entity_class):
 
 @pytest.fixture()
 def expected_entity_instance(entity_class, instance_values):
+    """Returns an expected instance of an entity class based on provided values.
+
+    :param entity_class: The entity class to instantiate.
+    :param instance_values: The values to use.
+    :return: A instance of the provided entity class.
+    """
     return entity_class(**instance_values)

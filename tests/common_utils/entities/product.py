@@ -3,12 +3,12 @@
 from uuid import UUID
 
 from pymnesia.entities.field import Field
-from pymnesia.entities.base import BaseEntity
+from pymnesia.entities.base import DeclarativeBase
 
 __all__ = ["InMemoryProduct"]
 
 
-class InMemoryProduct(BaseEntity):
+class InMemoryProduct(DeclarativeBase):
     __tablename__ = "products"
 
     id: UUID

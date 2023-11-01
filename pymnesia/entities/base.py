@@ -3,7 +3,7 @@
 from pymnesia.entities.meta import EntityMeta
 
 
-class BaseEntity(metaclass=EntityMeta):
+class DeclarativeBase(metaclass=EntityMeta):
     """Base class for entities.
 
     @DynamicAttrs"""

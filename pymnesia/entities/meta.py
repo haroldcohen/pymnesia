@@ -3,6 +3,7 @@
 from dataclasses import make_dataclass, field
 
 from pymnesia.entities.field import UNDEFINED
+from pymnesia.entities.entity import Entity
 from pymnesia.entities.registry import registry
 
 
@@ -13,10 +14,11 @@ class EntityMeta(type):
     """
 
     def __new__(mcs, name, base, attrs):
-        if name == "BaseEntity":
+        if name == "DeclarativeBase":
             return super().__new__(mcs, name, base, attrs)
 
         fields_to_create = []
+        relations = []
         for field_name, field_type in attrs["__annotations__"].items():
             if field_name in attrs.keys():
                 field_as_attr = attrs[field_name]
@@ -35,9 +37,14 @@ class EntityMeta(type):
                     field_name,
                     field_type
                 ))
+                if issubclass(field_type, Entity):
+                    relations.append(field_type)
 
-        cls = make_dataclass(name, fields_to_create)
+        cls = make_dataclass(name, fields_to_create, bases=(Entity,))
         cls.__tablename__ = attrs["__tablename__"]
         registry.register(cls)
+
+        for relation in relations:
+            relation.__annotations__[cls.__tablename__[0:-1]] = cls
 
         return cls

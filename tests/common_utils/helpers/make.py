@@ -1,10 +1,10 @@
 """Provides with dynamically constructed entity classes.
 """
 from dataclasses import MISSING
-from typing import Any, Dict, Union, Tuple
+from typing import Any, Dict, Union, Tuple, Type
 
 from pymnesia.entities.field import Field, UNDEFINED
-from pymnesia.entities.base import BaseEntity
+from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.meta import EntityMeta
 
 __all__ = ["make_entity_class", "is_type_and_field_tuple"]
@@ -38,7 +38,7 @@ def make_entity_class(name: str, table_name: str, fields_conf: Dict[str, Union[t
 
         fields = fields_conf
 
-    return EntityMeta(name, [BaseEntity], GenericEntity.__dict__)
+    return EntityMeta(name, [DeclarativeBase], GenericEntity.__dict__)
 
 
 def is_type_and_field_tuple(field_conf: Any) -> bool:

@@ -1,6 +1,5 @@
 """Provides with unit tests to validate entities registry related features.
 """
-import datetime
 from dataclasses import is_dataclass
 from uuid import UUID, uuid4
 
@@ -14,6 +13,7 @@ from tests.common_utils.fixtures.registry import *
 from pymnesia.entities.config import EntityConfig
 from pymnesia.entities.field import Field
 from pymnesia.entities.registry import registry
+from pymnesia.entities.entity import Entity
 
 
 @pytest.mark.parametrize(
@@ -26,7 +26,7 @@ from pymnesia.entities.registry import registry
         }, {"id": uuid4(), "amount": 2.3}),
         ("InMemoryOrderLine", "order_lines", {
             "id": UUID,
-            "customization": (datetime.datetime, Field(default_factory=lambda: {})),
+            "customization": (dict, Field(default_factory=lambda: {})),
         }, {"id": uuid4()}),
     ],
     indirect=True,
@@ -54,6 +54,10 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
     )
     assert_that(
         is_dataclass(entity_class),
+        equal_to(True)
+    )
+    assert_that(
+        issubclass(entity_class, Entity),
         equal_to(True)
     )
     assert_that(
