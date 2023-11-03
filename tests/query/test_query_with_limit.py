@@ -35,7 +35,7 @@ def test_query_an_entity_table_with_a_limit_should_return_a_number_of_limited_en
         populate_entities,
 ):
     # Act
-    result = getattr(unit_of_work.query(), expected_entities[0].config.table_name)().limit(limit=limit).fetch()
+    result = getattr(unit_of_work.query(), expected_entities[0].__tablename__)().limit(limit=limit).fetch()
     # Assert
     assert_that(
         result,

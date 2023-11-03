@@ -1,13 +1,10 @@
 """Provides with fixtures related to dynamically declared entities.
 """
-from typing import Union, Type, Dict, Tuple
-
 import pytest
 
-__all__ = ["entity_class_name", "table_name", "fields_conf", "entity_class", "instance_values"]
+from tests.common_utils.helpers.make import make_entity_class, FieldsConf
 
-from pymnesia.entities.field import Field
-from tests.common_utils.helpers.make import make_entity_class
+__all__ = ["entity_class_name", "table_name", "fields_conf", "entity_class", "instance_values"]
 
 
 @pytest.fixture()
@@ -25,7 +22,7 @@ def table_name(request):
 
 
 @pytest.fixture()
-def fields_conf(request) -> Dict[str, Union[Type, Tuple[Type, Field]]]:
+def fields_conf(request) -> FieldsConf:
     """The fields to make for an entity class.
     :return: Either a dict of Type or a dict of a tuple of a Type and a Field.
     """
@@ -33,7 +30,7 @@ def fields_conf(request) -> Dict[str, Union[Type, Tuple[Type, Field]]]:
 
 
 @pytest.fixture()
-def entity_class(entity_class_name, table_name, fields_conf):
+def entity_class(entity_class_name, table_name, fields_conf: FieldsConf):
     """Returns a dynamically made entity class.
 
     :param entity_class_name: The class name to use for making the class.

@@ -33,7 +33,7 @@ def test_query_an_entity_table_should_return_all_its_entities(
         populate_entities,
 ):
     # Act
-    result = getattr(unit_of_work.query(), expected_entities[0].config.table_name)().fetch()
+    result = getattr(unit_of_work.query(), expected_entities[0].__tablename__)().fetch()
     # Assert
     assert_that(
         result,

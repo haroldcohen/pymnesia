@@ -54,7 +54,7 @@ def test_query_and_fetch_with_a_where_or_clause_should_return_a_number_of_filter
         populate_entities,
 ):
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].config.table_name)().where(where_clause)
+    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)().where(where_clause)
     for or_clause in or_clauses:
         base_query.or_(or_clause)
     result = base_query.fetch()
@@ -95,7 +95,7 @@ def test_query_and_fetch_with_a_where_or_clause_and_order_by_should_return_a_num
     # Arrange
     sorted_entities = sorted(expected_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].config.table_name)().where(where_clause)
+    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)().where(where_clause)
     for or_clause in or_clauses:
         base_query.or_(or_clause)
     base_query.order_by(direction, order_by_key)
@@ -132,7 +132,7 @@ def test_query_and_fetch_one_with_a_where_or_clause_should_return_one_filtered_e
         populate_entities,
 ):
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entity.config.table_name)().where(where_clause)
+    base_query: Query = getattr(unit_of_work.query(), expected_entity.__tablename__)().where(where_clause)
     for or_clause in or_clauses:
         base_query.or_(or_clause)
     result = base_query.fetch_one()

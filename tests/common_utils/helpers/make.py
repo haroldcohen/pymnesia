@@ -1,16 +1,24 @@
 """Provides with dynamically constructed entity classes.
 """
 from dataclasses import MISSING
-from typing import Any, Dict, Union, Tuple, Type
+from typing import Any, Dict, Union, Tuple
 
 from pymnesia.entities.field import Field, UNDEFINED
+from pymnesia.entities.relations import Relation
 from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.meta import EntityMeta
 
-__all__ = ["make_entity_class", "is_type_and_field_tuple"]
+__all__ = ["make_entity_class", "is_type_and_field_tuple", "FieldConf", "FieldsConf"]
+
+FieldConf = Union[type, Tuple[type, Union[Field, Relation]]]
+
+FieldsConf = Dict[str, FieldConf]
 
 
 class GenericEntityMeta(type):
+    """Metaclass used for dynamically making entity classes.
+    """
+
     def __new__(mcs, name, base, attrs):
         new_attributes = {"__annotations__": {}}
         for field_name, field_conf in attrs["fields"].items():
@@ -29,10 +37,19 @@ class GenericEntityMeta(type):
                 new_attributes["__annotations__"][field_name] = field_conf
         for attr_name, attr_value in attrs.items():
             new_attributes[attr_name] = attr_value
+
         return super().__new__(mcs, name, base, new_attributes)
 
 
-def make_entity_class(name: str, table_name: str, fields_conf: Dict[str, Union[type, Tuple[type, Field]]]):
+def make_entity_class(name: str, table_name: str, fields_conf: FieldsConf):
+    """Dynamically creates an entity class.
+
+    :param name: The name of the class to create.
+    :param table_name: The table name under which the entity should be registered.
+    :param fields_conf: A dict of field configurations.
+    :return: A dynamically created entity class.
+    """
+
     class GenericEntity(metaclass=GenericEntityMeta):
         __tablename__ = table_name
 
@@ -48,7 +65,7 @@ def is_type_and_field_tuple(field_conf: Any) -> bool:
     :return: A boolean indicating if it is a simple type or not.
     """
     if isinstance(field_conf, tuple):
-        if isinstance(field_conf[0], type) and isinstance(field_conf[1], Field):
+        if isinstance(field_conf[0], type) and isinstance(field_conf[1], (Field, Relation)):
             return True
         return False
     return False

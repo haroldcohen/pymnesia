@@ -10,9 +10,7 @@ from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
 from tests.common_utils.fixtures.registry import *
-from pymnesia.entities.config import EntityConfig
 from pymnesia.entities.field import Field
-from pymnesia.entities.registry import registry
 from pymnesia.entities.entity import Entity
 
 
@@ -44,17 +42,15 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
         extracted_entity_class_fields,
         unregister_entity_class,
 ):
-    expected_config = EntityConfig(
-        table_name=table_name,
-    )
+    entity_instance = entity_class(**instance_values)
     # Assert
     assert_that(
-        registry.find(entity_class),
-        equal_to(expected_config)
+        entity_class.__tablename__,
+        equal_to(table_name)
     )
     assert_that(
-        is_dataclass(entity_class),
-        equal_to(True)
+        hasattr(entity_class, "config"),
+        equal_to(False)
     )
     assert_that(
         issubclass(entity_class, Entity),
@@ -63,6 +59,10 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
     assert_that(
         entity_class(**instance_values),
         equal_to(expected_entity_instance)
+    )
+    assert_that(
+        is_dataclass(entity_instance),
+        equal_to(True)
     )
     assert_that(
         entity_class.__annotations__,

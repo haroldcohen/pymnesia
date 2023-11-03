@@ -49,7 +49,7 @@ def test_query_and_fetch_one_with_a_where_clause_using_an_unregistered_custom_fi
     )
 
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entity.config.table_name)()
+    base_query: Query = getattr(unit_of_work.query(), expected_entity.__tablename__)()
     result = base_query.where_with_composition([composite_banana_func]).fetch_one()
     # Assert
     assert_that(
