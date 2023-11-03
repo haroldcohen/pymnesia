@@ -24,5 +24,10 @@ class EntityClassResolver:
     def __getattr__(self, item):
         return getattr(self._entity_cls, item)
 
-    def update_entity_cls(self, entity_cls):
+    def update_entity_cls(self, entity_cls: Type[Entity]):
+        """Updates the entity class associated with the resolver.
+
+        :param entity_cls: The updated entity class.
+        :return: None
+        """
         self._entity_cls = entity_cls
