@@ -38,12 +38,16 @@ class EntityMeta(type):
                     ))
                 if isinstance(field_as_attr, Relation):
                     relations[field_type] = field_as_attr
-                    add_foreign_key_to_fields(relation_name=field_name, fields=fields)
+                    add_foreign_key_to_fields(
+                        relation_name=field_name,
+                        fields=fields,
+                        is_nullable=field_as_attr.is_nullable
+                    )
                     relation_fields[field_type] = field_name
             else:
                 if issubclass(field_type, Entity):
                     relations[field_type] = Relation(reverse=tablename[0:-1])
-                    add_foreign_key_to_fields(relation_name=field_name, fields=fields)
+                    add_foreign_key_to_fields(relation_name=field_name, fields=fields, is_nullable=False)
                     relation_fields[field_type] = field_name
                 else:
                     fields.append((
@@ -90,7 +94,11 @@ def _make_relations(
 
     for relation, relation_field in relations.items():
         relation_current_fields = _extract_entity_cls_fields(relation)
-        add_foreign_key_to_fields(relation_name=tablename[0:-1], fields=relation_current_fields)
+        add_foreign_key_to_fields(
+            relation_name=tablename[0:-1],
+            fields=relation_current_fields,
+            is_nullable=relation_field.is_nullable,
+        )
         add_relation_to_fields(
             relation_name=relation_field.reverse,
             relation=cls_resolver,
@@ -167,16 +175,18 @@ def _extract_entity_field_attrs(
     return field_attrs
 
 
-def add_foreign_key_to_fields(relation_name: str, fields: List):
+def add_foreign_key_to_fields(relation_name: str, fields: List, is_nullable: bool):
     """Adds a foreign key to an entity class.
     Procedural function that mutates fields.
 
     :param relation_name: The name of the relation from which the foreign key should be built and added.
     :param fields: The list of fields instance to which the foreign key should be added.
+    :param is_nullable: Wether the relation is nullable or not.
     """
     fields.append((
         build_foreign_key_name(relation_name),
-        UUID
+        UUID,
+        field(default=None if is_nullable else MISSING)
     ))
 
 
