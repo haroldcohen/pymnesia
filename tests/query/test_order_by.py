@@ -44,7 +44,7 @@ def test_query_and_order_by_should_return_ordered_entities(
         order_by_key,
 ):
     # Act
-    result = getattr(unit_of_work.query(), expected_entities[0].config.table_name)()\
+    result = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()\
         .order_by(direction, order_by_key)\
         .fetch()
     sorted_entities = sorted(expected_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")

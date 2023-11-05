@@ -15,7 +15,7 @@ class QueryRunner:
         Returns the entities in the unit of work matching the entity class.
         :return: A list of entities.
         """
-        return [value for key, value in getattr(self.__unit_of_work, self.__entity_class.config.table_name).items()]
+        return [value for key, value in getattr(self.__unit_of_work, self.__entity_class.__tablename__).items()]
 
     def __run_query_funcs(self, *query_funcs):
         """

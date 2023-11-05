@@ -16,9 +16,9 @@ class QueryEngineType(type):
 
             return table_query_maker
 
-        for entity_class, config in registry.all_configs():
-            table = table_maker(entity_class)
-            table.__name__ = config.table_name
+        for entity_cls_resolver in registry.all_configs():
+            table = table_maker(entity_cls_resolver)
+            table.__name__ = entity_cls_resolver.__tablename__
             attrs[table.__name__] = table
 
         return super().__new__(mcs, name, bases, attrs)

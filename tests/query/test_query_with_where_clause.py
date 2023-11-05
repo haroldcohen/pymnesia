@@ -37,7 +37,7 @@ def test_query_and_fetch_one_with_a_where_clause_should_return_a_single_filtered
         populate_expected_last,
 ):
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entity.config.table_name)()
+    base_query: Query = getattr(unit_of_work.query(), expected_entity.__tablename__)()
     result = base_query \
         .where(where_clause) \
         .fetch_one()
@@ -69,7 +69,7 @@ def test_query_and_fetch_with_a_where_clause_should_return_a_number_of_filtered_
         populate_entities,
 ):
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].config.table_name)()
+    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
     result = base_query \
         .where(where_clause) \
         .fetch()
@@ -139,7 +139,7 @@ def test_query_and_fetch_with_a_where_clause_different_from_equal_should_return_
         populate_entities,
 ):
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].config.table_name)()
+    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
     result = base_query \
         .where(where_clause) \
         .fetch()
@@ -179,7 +179,7 @@ def test_query_and_fetch_with_a_where_clause_and_order_by_should_return_a_number
 ):
     # Act
     sorted_entities = sorted(expected_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
-    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].config.table_name)()
+    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
     result = base_query \
         .where(where_clause) \
         .order_by(direction, order_by_key) \
@@ -220,7 +220,7 @@ def test_query_and_fetch_with_a_where_clause_and_limit_should_return_a_limited_n
         limit,
 ):
     # Act
-    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].config.table_name)()
+    base_query: Query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
     result = base_query \
         .where(where_clause) \
         .limit(limit) \

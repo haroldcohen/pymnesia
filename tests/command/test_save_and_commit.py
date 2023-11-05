@@ -40,7 +40,7 @@ def test_save_an_entity_and_commit_should_update_unit_of_work_with_an_entity(
     transaction.commit()
 
     # Assert
-    retrieved_entity = getattr(unit_of_work, expected_entity.config.table_name)[expected_entity.id]
+    retrieved_entity = getattr(unit_of_work, expected_entity.__tablename__)[expected_entity.id]
     *_, last = transaction.history()
     assert_that(
         last,
@@ -82,7 +82,7 @@ def test_save_multiple_entities_and_commit_should_update_unit_of_work_with_multi
         equal_to(expected_unit_of_work_memento)
     )
     for expected_entity in expected_entities:
-        retrieved_entity = getattr(unit_of_work, expected_entity.config.table_name)[expected_entity.id]
+        retrieved_entity = getattr(unit_of_work, expected_entity.__tablename__)[expected_entity.id]
         assert_that(
             retrieved_entity,
             equal_to(expected_entity)

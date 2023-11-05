@@ -1,16 +1,16 @@
 """Provides with fixtures to build expected entities.
 """
 from dataclasses import fields, MISSING
-from typing import Dict, Union, Tuple
 
 import pytest
+
+from pymnesia.entities.field import UNDEFINED
+from tests.common_utils.helpers import extract_entity_class_fields, extract_expected_dataclass_fields
+from tests.common_utils.helpers.make import is_type_and_field_tuple, FieldsConf
 
 __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
            "where_clause", "or_clauses", "expected_entity_attributes", "expected_dataclass_fields",
            "extracted_entity_class_fields", "expected_entity_instance"]
-
-from pymnesia.entities.field import UNDEFINED, Field
-from tests.common_utils.helpers.make import is_type_and_field_tuple
 
 
 @pytest.fixture()
@@ -21,7 +21,7 @@ def expected_entity(request, expected_unit_of_work_memento, use_properties):
         if len(use_properties):
             for prop, value in use_properties.items():
                 setattr(entity, prop, value)
-        table = getattr(expected_unit_of_work_memento, entity.config.table_name)
+        table = getattr(expected_unit_of_work_memento, entity.__tablename__)
         table[entity.id] = entity
 
         return entity
@@ -37,7 +37,7 @@ def expected_entities(request, expected_unit_of_work_memento, use_properties):
             if len(use_properties):
                 for prop, value in use_properties.items():
                     setattr(entity, prop, value)
-            table = getattr(expected_unit_of_work_memento, entity.config.table_name)
+            table = getattr(expected_unit_of_work_memento, entity.__tablename__)
             table[entity.id] = entity
 
         return request.param
@@ -103,35 +103,21 @@ def expected_entity_attributes(fields_conf):
 
 
 @pytest.fixture()
-def expected_dataclass_fields(fields_conf: Dict[str, Union[type, Tuple[type, Field]]]):
-    expected_fields = []
-    for field_name, field_conf in fields_conf.items():
-        expected = {"name": field_name, "type": field_conf, "default": MISSING, "default_factory": MISSING}
-        if is_type_and_field_tuple(field_conf):
-            field = field_conf[1]
-            expected["type"] = field_conf[0]
-            expected["default"] = field.default if field.default is not UNDEFINED else MISSING
-            expected["default_factory"] = field.default_factory \
-                if field.default_factory is not UNDEFINED else MISSING
-        expected_fields.append(expected)
-
-    return expected_fields
+def expected_dataclass_fields(fields_conf: FieldsConf):
+    return extract_expected_dataclass_fields(fields_conf=fields_conf)
 
 
 @pytest.fixture()
 def extracted_entity_class_fields(entity_class):
-    fields_to_assert = []
-    for entity_field in fields(entity_class):
-        fields_to_assert.append({
-            "name": entity_field.name,
-            "type": entity_field.type,
-            "default": entity_field.default,
-            "default_factory": entity_field.default_factory,
-        })
-
-    return fields_to_assert
+    return extract_entity_class_fields(entity_class)
 
 
 @pytest.fixture()
 def expected_entity_instance(entity_class, instance_values):
+    """Returns an expected instance of an entity class based on provided values.
+
+    :param entity_class: The entity class to instantiate.
+    :param instance_values: The values to use.
+    :return: A instance of the provided entity class.
+    """
     return entity_class(**instance_values)

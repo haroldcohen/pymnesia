@@ -27,8 +27,8 @@ class UnitOfWork(OriginatorInterface):
         self.__setup()
 
     def __setup(self):
-        for entity_class, config in registry.all_configs():  # pylint: disable=unused-variable
-            self.__dict__[config.table_name] = {}
+        for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
+            self.__dict__[entity_cls_resolver.__tablename__] = {}
 
     def save_entity(self, entity):
         """
@@ -36,20 +36,28 @@ class UnitOfWork(OriginatorInterface):
         :param entity: The entity to save.
         """
         self.__replica.state = time.time_ns()
-        table = getattr(self.__replica, entity.config.table_name)
+        table = getattr(self.__replica, entity.__tablename__)
         table[entity.id] = entity
 
     def save(self) -> UnitOfWorkMemento:
         self.__state = deepcopy(self.__replica.state)
-        for entity_class, config in registry.all_configs():  # pylint: disable=unused-variable
-            setattr(self, config.table_name, deepcopy(getattr(self.__replica, config.table_name)))
+        for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
+            setattr(
+                self,
+                entity_cls_resolver.__tablename__,
+                deepcopy(getattr(self.__replica, entity_cls_resolver.__tablename__))
+            )
 
         memento = UnitOfWorkMemento(
             state=self.__state,
         )
 
-        for entity_class, config in registry.all_configs():
-            setattr(memento, config.table_name, deepcopy(getattr(self.__replica, config.table_name)))
+        for entity_cls_resolver in registry.all_configs():
+            setattr(
+                memento,
+                entity_cls_resolver.__tablename__,
+                deepcopy(getattr(self.__replica, entity_cls_resolver.__tablename__))
+            )
 
         return memento
 
@@ -60,8 +68,8 @@ class UnitOfWork(OriginatorInterface):
         :return: A query engine instantiated with the current unit of work state.
         """
         tables = {}
-        for entity_class, config in registry.all_configs():  # pylint: disable=unused-variable
-            tables[config.table_name] = deepcopy(getattr(self, config.table_name))
+        for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
+            tables[entity_cls_resolver.__tablename__] = deepcopy(getattr(self, entity_cls_resolver.__tablename__))
 
         return QueryEngine(
             unit_of_work=UnitOfWorkMemento(

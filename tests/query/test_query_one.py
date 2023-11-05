@@ -33,7 +33,7 @@ def test_query_an_entity_table_should_return_the_first_entity(
         populate_entities,
 ):
     # Act
-    result = getattr(unit_of_work.query(), expected_entity.config.table_name)().fetch_one()
+    result = getattr(unit_of_work.query(), expected_entity.__tablename__)().fetch_one()
     # Assert
     assert_that(
         result,

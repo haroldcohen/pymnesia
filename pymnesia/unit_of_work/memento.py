@@ -20,10 +20,10 @@ def make_fields(entities_registry) -> list:
     fields = [("state", int)]
     fields += [
         (
-            config.table_name,
-            Dict[UUID, class_],
+            entity_cls_resolver.__tablename__,
+            Dict[UUID, entity_cls_resolver],
             field(default_factory=lambda: {})  # pylint: disable=invalid-field-call
-        ) for class_, config in entities_registry.all_configs()
+        ) for entity_cls_resolver in entities_registry.all_configs()
     ]
 
     return fields

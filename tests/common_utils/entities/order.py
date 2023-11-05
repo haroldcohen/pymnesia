@@ -2,13 +2,13 @@
 """
 from uuid import UUID
 
-from pymnesia.entities.base import BaseEntity
+from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.field import Field
 
 __all__ = ["InMemoryOrder"]
 
 
-class InMemoryOrder(BaseEntity):
+class InMemoryOrder(DeclarativeBase):
     __tablename__ = "orders"
 
     id: UUID

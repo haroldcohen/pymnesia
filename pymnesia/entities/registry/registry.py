@@ -1,28 +1,35 @@
 """Provides with a registry to store and use entities' configuration.
 """
-from pymnesia.entities.config import EntityConfig
+from typing import Generator
+
+from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
 
 
-class PymnesiaRegistry:
+class PymnesiaRegistry(PymnesiaRegistryInterface):
     """Registry class that stores entity configurations.
     """
 
     def __init__(self):
-        self._entries = {}
+        self._entries = []
 
-    def register(self, entity_class):
-        config = EntityConfig(
-            table_name=entity_class.__tablename__
+    def register(self, entity_class) -> EntityClassResolver:
+        resolver_cls = type(
+            entity_class.__name__,
+            (EntityClassResolver,),
+            {}
         )
-        entity_class.config = config
-        self._entries[entity_class] = config
+        resolver = resolver_cls(
+            entity_cls=entity_class,
+            registry=self,
+        )
+        self._entries.append(resolver)
 
-    def unregister(self, entity_class):
-        del self._entries[entity_class]
+        return resolver
 
-    def all_configs(self):
-        for config in self._entries.items():
-            yield config
+    def unregister(self, entity_cls_resolver):
+        self._entries.remove(entity_cls_resolver)
 
-    def find(self, entity_class):
-        return self._entries[entity_class]
+    def all_configs(self) -> Generator[EntityClassResolver, None, None]:
+        for resolver in self._entries:
+            yield resolver
