@@ -186,7 +186,7 @@ def add_foreign_key_to_fields(relation_name: str, fields: List, is_nullable: boo
     fields.append((
         build_foreign_key_name(relation_name),
         UUID,
-        field(default=None if is_nullable else MISSING)
+        field(default=None if is_nullable else MISSING)  # pylint: disable=invalid-field-call
     ))
 
 
