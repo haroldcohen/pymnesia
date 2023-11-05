@@ -28,18 +28,104 @@ def use_relation_api(request):
 
 
 @pytest.mark.parametrize(
-    "entity_class_name, table_name, fields_conf, instance_values, reverse, use_relation_api",
+    "entity_class_name, table_name, fields_conf, instance_values, use_relation_api",
     [
         ("Invoice", "invoices", {
             "id": UUID,
-        }, {"id": uuid4()}, "order_test", True),
+        }, {"id": uuid4()}, True),
         ("Invoice", "invoices", {
             "id": UUID,
-        }, {"id": uuid4()}, "order_test_2", False),
+        }, {"id": uuid4()}, True),
     ],
     indirect=True,
 )
-def test_register_orders_with_a_one_to_one_relation_field_should_update_the_registry_with_a_matching_relation(
+def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_with_a_matching_relation(
+        entity_class_name,
+        table_name,
+        fields_conf,
+        entity_class,
+        instance_values,
+        expected_entity_attributes,
+        unit_of_work,
+        unregister_entity_class,
+        use_relation_api,
+):
+    # Arrange
+    expected_related_entity_attributes = {
+        **expected_entity_attributes,
+    }
+
+    # Act
+    class InMemoryOrder(DeclarativeBase):
+        __tablename__ = "orders"
+
+        id: UUID
+
+        if use_relation_api:
+            invoice: entity_class = Relation(reverse="order")
+        else:
+            invoice: entity_class
+
+    expected_related_entity_attributes["order_id"] = UUID
+    expected_related_entity_attributes["order"] = InMemoryOrder
+    expected_order_entity_attributes = {
+        "id": UUID,
+        "invoice_id": UUID,
+        "invoice": entity_class,
+    }
+    expected_related_entity_class_fields = extract_expected_dataclass_fields(fields_conf)
+    expected_related_entity_class_fields.append({
+        "name": "order_id",
+        "type": UUID,
+        "default": None,
+        "default_factory": MISSING,
+    })
+    expected_related_entity_class_fields.append({
+        "name": "order",
+        "type": InMemoryOrder,
+        "default": None,
+        "default_factory": MISSING,
+    })
+    extracted_related_entity_class_fields = extract_entity_class_fields(entity_class)
+    # Assert
+    assert_that(
+        entity_class.__annotations__,
+        equal_to(expected_related_entity_attributes)
+    )
+    assert_that(
+        InMemoryOrder.__annotations__,
+        equal_to(expected_order_entity_attributes)
+    )
+    assert_that(
+        extracted_related_entity_class_fields,
+        equal_to(expected_related_entity_class_fields)
+    )
+    try:
+        order_id = uuid4()
+        invoice_id = uuid4()
+        InMemoryOrder(id=order_id)
+        InMemoryOrder(id=order_id, invoice_id=invoice_id)
+        entity_class(**instance_values)
+        entity_class(**instance_values, order_id=order_id)
+    except TypeError:
+        assert False
+    # Cleanup
+    registry.unregister(InMemoryOrder)
+
+
+@pytest.mark.parametrize(
+    "entity_class_name, table_name, fields_conf, instance_values, reverse",
+    [
+        ("Invoice", "invoices", {
+            "id": UUID,
+        }, {"id": uuid4()}, "order_test"),
+        ("Invoice", "invoices", {
+            "id": UUID,
+        }, {"id": uuid4()}, "order_test_2"),
+    ],
+    indirect=True,
+)
+def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_the_registry_with_a_matching_relation(
         entity_class_name,
         table_name,
         fields_conf,
@@ -49,16 +135,11 @@ def test_register_orders_with_a_one_to_one_relation_field_should_update_the_regi
         unit_of_work,
         unregister_entity_class,
         reverse,
-        use_relation_api,
 ):
     # Arrange
     expected_related_entity_attributes = {
         **expected_entity_attributes,
     }
-    order_id = uuid4()
-    invoice_id = uuid4()
-    if not use_relation_api:
-        reverse = "order"
 
     # Act
     class InMemoryOrder(DeclarativeBase):
@@ -66,10 +147,7 @@ def test_register_orders_with_a_one_to_one_relation_field_should_update_the_regi
 
         id: UUID
 
-        if use_relation_api:
-            invoice: entity_class = Relation(reverse=reverse)
-        else:
-            invoice: entity_class
+        invoice: entity_class = Relation(reverse=reverse, is_nullable=False)
 
     expected_related_entity_attributes["order_id"] = UUID
     expected_related_entity_attributes[reverse] = InMemoryOrder
@@ -105,11 +183,10 @@ def test_register_orders_with_a_one_to_one_relation_field_should_update_the_regi
         extracted_related_entity_class_fields,
         equal_to(expected_related_entity_class_fields)
     )
-    assert_that(
-        InMemoryOrder(id=order_id, invoice_id=invoice_id),
-        equal_to(InMemoryOrder(id=order_id, invoice_id=invoice_id))
-    )
     try:
+        order_id = uuid4()
+        invoice_id = uuid4()
+        InMemoryOrder(id=order_id, invoice_id=invoice_id)
         entity_class(**instance_values, order_id=order_id)
     except TypeError:
         assert False
