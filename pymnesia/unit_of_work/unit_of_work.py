@@ -31,8 +31,8 @@ class UnitOfWork(OriginatorInterface):
             self.__dict__[entity_cls_resolver.__tablename__] = {}
 
     def save_entity(self, entity):
-        """
-        Saves an entity in the replica
+        """Saves an entity in the replica.
+
         :param entity: The entity to save.
         """
         self.__replica.state = time.time_ns()
@@ -40,30 +40,33 @@ class UnitOfWork(OriginatorInterface):
         table[entity.id] = entity
 
     def save(self) -> UnitOfWorkMemento:
+        """Saves the unit of work replica's current state.
+        Used by the caretaker to commit.
+
+        :return: The memento of the saved state.
+        """
         self.__state = deepcopy(self.__replica.state)
+        replica_values = {}
+
         for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
+            tablename = entity_cls_resolver.__tablename__
+            values = deepcopy(getattr(self.__replica, tablename))
             setattr(
                 self,
-                entity_cls_resolver.__tablename__,
-                deepcopy(getattr(self.__replica, entity_cls_resolver.__tablename__))
+                tablename,
+                values
             )
+            replica_values[tablename] = values
 
         memento = UnitOfWorkMemento(
             state=self.__state,
+            **replica_values
         )
-
-        for entity_cls_resolver in registry.all_configs():
-            setattr(
-                memento,
-                entity_cls_resolver.__tablename__,
-                deepcopy(getattr(self.__replica, entity_cls_resolver.__tablename__))
-            )
 
         return memento
 
     def query(self):
-        """
-        Returns a query engine to be used for querying the unit of work current state.
+        """Returns a query engine to be used for querying the unit of work current state.
 
         :return: A query engine instantiated with the current unit of work state.
         """
