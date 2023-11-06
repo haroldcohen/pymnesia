@@ -1,16 +1,13 @@
 """Provides with fixtures to build expected entities.
 """
-from dataclasses import fields, MISSING
-
 import pytest
 
-from pymnesia.entities.field import UNDEFINED
 from tests.common_utils.helpers import extract_entity_class_fields, extract_expected_dataclass_fields
 from tests.common_utils.helpers.make import is_type_and_field_tuple, FieldsConf
 
 __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
            "where_clause", "or_clauses", "expected_entity_attributes", "expected_dataclass_fields",
-           "extracted_entity_class_fields", "expected_entity_instance"]
+           "extracted_entity_class_fields", "expected_entity_instance", "use_dedicated_properties"]
 
 
 @pytest.fixture()
@@ -30,15 +27,20 @@ def expected_entity(request, expected_unit_of_work_memento, use_properties):
 
 
 @pytest.fixture()
-def expected_entities(request, expected_unit_of_work_memento, use_properties):
+def expected_entities(request, expected_unit_of_work_memento, use_properties, use_dedicated_properties):
     """Returns multiple entity instances to be used for assertion (and action as well)."""
     if hasattr(request, "param"):
+        properties_idx = 0
         for entity in request.param:
-            if len(use_properties):
+            if use_properties:
                 for prop, value in use_properties.items():
+                    setattr(entity, prop, value)
+            if use_dedicated_properties:
+                for prop, value in use_dedicated_properties[properties_idx].items():
                     setattr(entity, prop, value)
             table = getattr(expected_unit_of_work_memento, entity.__tablename__)
             table[entity.id] = entity
+            properties_idx += 1
 
         return request.param
 
@@ -121,3 +123,9 @@ def expected_entity_instance(entity_class, instance_values):
     :return: A instance of the provided entity class.
     """
     return entity_class(**instance_values)
+
+
+@pytest.fixture()
+def use_dedicated_properties(request):
+    if hasattr(request, "param"):
+        return request.param

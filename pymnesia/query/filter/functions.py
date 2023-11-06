@@ -7,6 +7,8 @@ from pymnesia.query.filter.registry import register_filter_func
 __all__ = ["filter_eq", "filter_not", "filter_greater_than", "filter_greater_than_or_equal", "filter_less_than",
            "filter_less_than_or_equal", "filter_match", "filter_in"]
 
+from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+
 
 @register_filter_func(filter_name="eq")
 def filter_eq(entities: Iterable, field: str, value: Any) -> filter:
@@ -18,6 +20,22 @@ def filter_eq(entities: Iterable, field: str, value: Any) -> filter:
     :return: An iterable (filter) containing the filtered results.
     """
     return filter(lambda e: getattr(e, field) == value, entities)
+
+
+@register_filter_func(filter_name="rel_eq")
+def filter_rel_eq(entities: Iterable, field: str, value: Any, unit_of_work: UnitOfWorkMemento) -> filter:
+    """
+    Filters entities whose field is equal to a given value.
+    :param entities: The entities to filter.
+    :param field: The field to compare.
+    :param value: The value to use for comparison.
+    :param unit_of_work:
+    :return: An iterable (filter) containing the filtered results.
+    """
+    rels = unit_of_work.invoices.values()
+    filtered_rel_ids = [rel.id for rel in filter(lambda e: getattr(e, field) == value, rels)]
+
+    return filter(lambda e: getattr(e, "invoice_id") in filtered_rel_ids, entities)
 
 
 @register_filter_func(filter_name="not")

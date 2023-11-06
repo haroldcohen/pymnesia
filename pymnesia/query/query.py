@@ -88,8 +88,7 @@ class Query:
 
         return self
 
-    @staticmethod
-    def __build_filter_composite_funcs(clause: dict) -> list[Callable]:
+    def __build_filter_composite_funcs(self, clause: dict) -> list[Callable]:
         """
         Builds partial/composite functions to use for where/or clauses.
         :param clause: The clause to build the functions from.
@@ -97,17 +96,22 @@ class Query:
         """
         filter_funcs = []
         for condition, value in clause.items():
+            filter_args = {"value": value}
             matched_condition = re.match(r'^(?P<field>\w+)::(?P<operator>\w+)$', condition)
             if matched_condition:
                 filter_func = FILTER_FUNCTIONS_REGISTRY[matched_condition.group("operator")]
-                field = matched_condition.group("field")
+                filter_args["field"] = matched_condition.group("field")
             else:
                 filter_func = FILTER_FUNCTIONS_REGISTRY["eq"]
-                field = condition
+                filter_args["field"] = condition
+                matched_rel_property = re.match(r'^(?P<rel>\w+)\.(?P<rel_property>\w+)$', condition)
+                if matched_rel_property:
+                    filter_func = FILTER_FUNCTIONS_REGISTRY["rel_eq"]
+                    filter_args["unit_of_work"] = self.__unit_of_work
+                    filter_args["field"] = matched_rel_property.group("rel_property")
             filter_funcs.append(runner(
                 filter_func,
-                field=field,
-                value=value,
+                **filter_args
             ))
 
         return filter_funcs

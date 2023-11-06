@@ -4,10 +4,12 @@ from dataclasses import make_dataclass, field, fields as dataclass_fields, MISSI
 from typing import List, Type, Tuple, Dict, Union
 from uuid import UUID
 
+from pymnesia.entities.entity_cls_conf import EntityClsConf
 from pymnesia.entities.field import UNDEFINED, Field
 from pymnesia.entities.entity import Entity
 from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
+from pymnesia.entities.entity_resolver import EntityClassResolver
 
 
 class EntityMeta(type):
@@ -38,7 +40,7 @@ class EntityMeta(type):
                     ))
                 if isinstance(field_as_attr, Relation):
                     relations[field_type] = field_as_attr
-                    add_foreign_key_to_fields(
+                    _add_foreign_key_to_fields(
                         relation_name=field_name,
                         fields=fields,
                         is_nullable=field_as_attr.is_nullable
@@ -47,7 +49,7 @@ class EntityMeta(type):
             else:
                 if issubclass(field_type, Entity):
                     relations[field_type] = Relation(reverse=tablename[0:-1])
-                    add_foreign_key_to_fields(relation_name=field_name, fields=fields, is_nullable=False)
+                    _add_foreign_key_to_fields(relation_name=field_name, fields=fields, is_nullable=False)
                     relation_fields[field_type] = field_name
                 else:
                     fields.append((
@@ -74,9 +76,9 @@ class EntityMeta(type):
 
 
 def _make_relations(
-        relations: Dict[Type[Entity], Relation],
-        cls_resolver,
-        relation_fields: Dict[Type[Entity], str],
+        relations: Dict[EntityClassResolver, Relation],
+        cls_resolver: EntityClassResolver,
+        relation_fields: Dict[EntityClassResolver, str],
         cls_resolver_current_fields: List[Tuple],
 ):
     """Makes relations for both the relation owner and the related entities.
@@ -94,12 +96,12 @@ def _make_relations(
 
     for relation, relation_field in relations.items():
         relation_current_fields = _extract_entity_cls_fields(relation)
-        add_foreign_key_to_fields(
+        _add_foreign_key_to_fields(
             relation_name=tablename[0:-1],
             fields=relation_current_fields,
             is_nullable=relation_field.is_nullable,
         )
-        add_relation_to_fields(
+        _add_relation_to_fields(
             relation_name=relation_field.reverse,
             relation=cls_resolver,
             fields=relation_current_fields
@@ -110,10 +112,16 @@ def _make_relations(
             fields=relation_current_fields
         )
         relation.update_entity_cls(relation_new_cls)
-        add_relation_to_fields(
+        _add_relation_to_fields(
             relation_name=relation_fields[relation],
             relation=relation,
             fields=nullable_fields,
+        )
+        _add_relation_to_entity_cls_conf(
+            conf=cls_resolver.__conf__,
+            relation=relation,
+            relation_name=relation_fields[relation],
+            relation_field=relation_field
         )
 
     updated_entity_cls = _make_entity_dataclass(
@@ -121,10 +129,11 @@ def _make_relations(
         tablename=tablename,
         fields=cls_resolver_current_fields + nullable_fields
     )
+    updated_entity_cls.__conf__ = cls_resolver.__conf__
     cls_resolver.update_entity_cls(updated_entity_cls)
 
 
-def _make_entity_dataclass(name: str, tablename: str, fields: List[Tuple]):
+def _make_entity_dataclass(name: str, tablename: str, fields: List[Tuple]) -> Type[Entity]:
     """Makes a dataclass from entity class parameters.
 
     :param name: The entity class name
@@ -134,8 +143,30 @@ def _make_entity_dataclass(name: str, tablename: str, fields: List[Tuple]):
     """
     entity_cls = make_dataclass(name, fields, bases=(Entity,))
     entity_cls.__tablename__ = tablename
+    entity_cls.__conf__ = EntityClsConf()
 
+    # noinspection PyTypeChecker
     return entity_cls
+
+
+def _add_relation_to_entity_cls_conf(
+        conf: EntityClsConf,
+        relation,
+        relation_name: str,
+        relation_field: Relation
+):
+    """Adds a relation to an entity class configuration.
+    Procedural function that mutates a configuration.
+
+    :param conf: The configuration to add the relation to.
+    :param relation: The class resolver of the relation to add.
+    :param relation_name: The relation name, meaning the property declared in the relation owner.
+    :param relation_field: The relation field to add to the configuration.
+    :return: None
+    """
+    relation_field.entity_cls_resolver = relation
+    relation_field.key = _build_foreign_key_name(relation_name=relation_name)
+    conf.relations[relation_name] = relation_field
 
 
 def _extract_entity_cls_fields(entity_cls) -> List[Tuple]:
@@ -175,7 +206,7 @@ def _extract_entity_field_attrs(
     return field_attrs
 
 
-def add_foreign_key_to_fields(relation_name: str, fields: List, is_nullable: bool):
+def _add_foreign_key_to_fields(relation_name: str, fields: List, is_nullable: bool):
     """Adds a foreign key to an entity class.
     Procedural function that mutates fields.
 
@@ -184,13 +215,13 @@ def add_foreign_key_to_fields(relation_name: str, fields: List, is_nullable: boo
     :param is_nullable: Wether the relation is nullable or not.
     """
     fields.append((
-        build_foreign_key_name(relation_name),
+        _build_foreign_key_name(relation_name),
         UUID,
         field(default=None if is_nullable else MISSING)  # pylint: disable=invalid-field-call
     ))
 
 
-def add_relation_to_fields(relation_name: str, relation: Type[Entity], fields: List):
+def _add_relation_to_fields(relation_name: str, relation: EntityClassResolver, fields: List):
     """Adds a foreign key to an entity class.
     Procedural function that mutates fields.
 
@@ -203,7 +234,7 @@ def add_relation_to_fields(relation_name: str, relation: Type[Entity], fields: L
     )
 
 
-def build_foreign_key_name(relation_name: str) -> str:
+def _build_foreign_key_name(relation_name: str) -> str:
     """Builds a foreign key name, based on a relation name.
 
     :param relation_name: The relation name from which to build the foreign key name.

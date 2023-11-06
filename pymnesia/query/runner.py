@@ -1,6 +1,7 @@
 """Provides with QueryRunner.
 """
 from pymnesia.composition import composite
+from pymnesia.entities.entity import Entity
 from pymnesia.unit_of_work.memento import UnitOfWorkMemento
 
 
@@ -11,15 +12,15 @@ class QueryRunner:
         self.__unit_of_work = unit_of_work
 
     def __entities(self):
-        """
-        Returns the entities in the unit of work matching the entity class.
+        """Returns the entities in the unit of work matching the entity class.
+
         :return: A list of entities.
         """
         return [value for key, value in getattr(self.__unit_of_work, self.__entity_class.__tablename__).items()]
 
     def __run_query_funcs(self, *query_funcs):
-        """
-        Runs the query functions passed when fetch methods are called.
+        """Runs the query functions passed when fetch methods are called.
+
         :param query_funcs: The query functions to run.
         :return: A list of results where filter, order by functions may have been run.
         """
@@ -28,8 +29,8 @@ class QueryRunner:
         return list(compose_query_funcs(self.__entities()))
 
     def __run_or_funcs(self, *or_func_groups):
-        """
-        Runs the query functions passed when fetch methods are called.
+        """Runs the query functions passed when fetch methods are called.
+
         :param query_funcs: The query functions to run.
         :return: A list of results where filter, order by functions may have been run.
         """
@@ -40,10 +41,28 @@ class QueryRunner:
 
         return or_results
 
-    def fetch(self, *args, or_function_groups: list, order_by_functions: list, limit: int) -> list:
+    def __load_relations(self, entity: Entity):
+        """Loads an entity relations from the unit of work.
+
+        :param entity: The entity for which to load the relations.
+        :return: None
         """
-        Returns multiple results based on a series of parameters,
+        for relation_name, relation in self.__entity_class.__conf__.relations.items():
+            relation_key_value = getattr(entity, relation.key)
+            if relation_key_value is not None:
+                setattr(
+                    entity,
+                    relation_name,
+                    getattr(
+                        self.__unit_of_work,
+                        relation.entity_cls_resolver.__tablename__
+                    )[getattr(entity, relation.key)]
+                )
+
+    def fetch(self, *args, or_function_groups: list, order_by_functions: list, limit: int) -> list:
+        """Returns multiple results based on a series of parameters,
         such as a where clause, a limit, and order_by, etc...
+
         :param args: The query functions to run.
         :param or_function_groups: The or function groups to run.
         :param order_by_functions: The limit to use.
@@ -58,14 +77,16 @@ class QueryRunner:
             compose_order_by_funcs = composite(*order_by_functions)
             results = compose_order_by_funcs(results)
         if limit:
-            return results[0:limit]
+            results = results[0:limit]
+        for result in results:
+            self.__load_relations(result)
 
         return results
 
     def fetch_one(self, *args, or_function_groups: list):
-        """
-        Returns the first result of a query based on a series of parameters,
+        """Returns the first result of a query based on a series of parameters,
         such as a where clause, an order_by, etc...
+
         :param args: The query functions to run.
         :param or_function_groups: The query functions to run.
         :return: A single entity
@@ -74,5 +95,8 @@ class QueryRunner:
         if args:
             results = self.__run_query_funcs(*args)
         results += self.__run_or_funcs(*or_function_groups)
+        result = results[0]
 
-        return results[0]
+        self.__load_relations(entity=result)
+
+        return result
