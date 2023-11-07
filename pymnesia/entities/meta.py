@@ -111,6 +111,7 @@ def _make_relations(
             tablename=relation.__tablename__,
             fields=relation_current_fields
         )
+        relation_new_cls.__conf__ = relation.__conf__
         relation.update_entity_cls(relation_new_cls)
         _add_relation_to_fields(
             relation_name=relation_fields[relation],

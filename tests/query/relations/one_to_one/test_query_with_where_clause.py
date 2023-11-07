@@ -8,6 +8,7 @@ from hamcrest import assert_that, equal_to
 from tests.common_utils.entities.order import InMemoryOrder
 from tests.common_utils.entities.invoice import InMemoryInvoice
 from tests.common_utils.entities.product import InMemoryProduct
+from tests.common_utils.entities.proforma import InMemoryProforma
 from tests.common_utils.entities.product_spec import InMemoryProductSpec
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.unit_of_work.expected import *
@@ -46,6 +47,30 @@ from tests.common_utils.fixtures.misc import *
          ],
          InMemoryOrder(id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26")),
          {"invoice.total_with_vat": 20},
+         {"invoice_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
+        ([
+             InMemoryOrder(id=uuid4()),
+             InMemoryProforma(
+                 id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
+                 total_with_vat=32,
+             ),
+             InMemoryInvoice(
+                 id=uuid4(),
+                 number="2023-00001",
+             ),
+             InMemoryInvoice(
+                 id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
+                 order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
+                 proforma_id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
+                 proforma=InMemoryProforma(
+                     id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
+                     total_with_vat=32,
+                 ),
+                 number="2023-00001",
+             ),
+         ],
+         InMemoryOrder(id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26")),
+         {"invoice.proforma.total_with_vat::gt": 30, "invoice.number::match": r'^2023-.*$'},
          {"invoice_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
     ],
     indirect=True,

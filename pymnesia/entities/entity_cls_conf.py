@@ -7,3 +7,5 @@ from typing import Dict
 @dataclass()
 class EntityClsConf:
     relations: Dict = field(default_factory=lambda: {})
+
+    fields: Dict = field(default_factory=lambda: {})

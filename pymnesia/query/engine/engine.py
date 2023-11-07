@@ -1,7 +1,6 @@
 """Provides with QueryEngine.
 """
-from pymnesia.query.engine_meta import QueryEngineType
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+from pymnesia.query.engine.meta import QueryEngineType
 
 
 class QueryEngine(metaclass=QueryEngineType):
@@ -13,6 +12,6 @@ class QueryEngine(metaclass=QueryEngineType):
 
     def __init__(
             self,
-            unit_of_work: UnitOfWorkMemento
+            unit_of_work
     ):
         self.unit_of_work = unit_of_work

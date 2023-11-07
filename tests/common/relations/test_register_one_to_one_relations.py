@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from hamcrest import assert_that, equal_to
 
+from pymnesia.entities.field import Field
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
@@ -17,6 +18,7 @@ from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
 from pymnesia.entities.entity_cls_conf import EntityClsConf
 from pymnesia.api.entities import relation
+from pymnesia.api.entities import field
 
 
 @pytest.fixture()
@@ -58,7 +60,9 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
             reverse="order",
             entity_cls_resolver=entity_class,
             key="invoice_id",
-        )}
+        )},
+        fields={},
+        # fields={"number": Field(default=None)},
     )
     expected_related_entity_attributes = {
         **expected_entity_attributes,
@@ -75,12 +79,15 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
         else:
             invoice: entity_class
 
+        number: str = field(default=None)
+
     expected_related_entity_attributes["order_id"] = UUID
     expected_related_entity_attributes["order"] = InMemoryOrder
     expected_order_entity_attributes = {
         "id": UUID,
         "invoice_id": UUID,
         "invoice": entity_class,
+        "number": str,
     }
     expected_related_entity_class_fields = extract_expected_dataclass_fields(fields_conf)
     expected_related_entity_class_fields.append({
@@ -156,7 +163,7 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
             is_nullable=False,
             entity_cls_resolver=entity_class,
             key="invoice_id",
-        )}
+        )},
     )
     expected_related_entity_attributes = {
         **expected_entity_attributes,
