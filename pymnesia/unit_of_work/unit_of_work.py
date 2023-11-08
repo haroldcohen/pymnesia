@@ -4,7 +4,7 @@ import time
 from copy import deepcopy
 
 from pymnesia.common.originator_interface import OriginatorInterface
-from pymnesia.query.engine import QueryEngine
+from pymnesia.query.engine.engine import QueryEngine
 from pymnesia.unit_of_work.memento import UnitOfWorkMemento
 from pymnesia.entities.registry import registry
 
@@ -70,13 +70,4 @@ class UnitOfWork(OriginatorInterface):
 
         :return: A query engine instantiated with the current unit of work state.
         """
-        tables = {}
-        for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
-            tables[entity_cls_resolver.__tablename__] = deepcopy(getattr(self, entity_cls_resolver.__tablename__))
-
-        return QueryEngine(
-            unit_of_work=UnitOfWorkMemento(
-                state=self.__state,
-                **tables
-            )
-        )
+        return QueryEngine(unit_of_work=self)

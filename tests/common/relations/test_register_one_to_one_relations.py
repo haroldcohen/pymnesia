@@ -15,6 +15,8 @@ from tests.common_utils.helpers.make import make_entity_class
 from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
+from pymnesia.entities.entity_cls_conf import EntityClsConf
+from pymnesia.api.entities import relation
 
 
 @pytest.fixture()
@@ -51,6 +53,13 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
         use_relation_api,
 ):
     # Arrange
+    expected_entity_cls_conf = EntityClsConf(
+        relations={"invoice": Relation(
+            reverse="order",
+            entity_cls_resolver=entity_class,
+            key="invoice_id",
+        )},
+    )
     expected_related_entity_attributes = {
         **expected_entity_attributes,
     }
@@ -62,7 +71,7 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
         id: UUID
 
         if use_relation_api:
-            invoice: entity_class = Relation(reverse="order")
+            invoice: entity_class = relation(reverse="order")
         else:
             invoice: entity_class
 
@@ -99,6 +108,10 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
     assert_that(
         extracted_related_entity_class_fields,
         equal_to(expected_related_entity_class_fields)
+    )
+    assert_that(
+        InMemoryOrder.__conf__,
+        equal_to(expected_entity_cls_conf)
     )
     try:
         order_id = uuid4()
@@ -137,6 +150,14 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
         reverse,
 ):
     # Arrange
+    expected_entity_cls_conf = EntityClsConf(
+        relations={"invoice": Relation(
+            reverse=reverse,
+            is_nullable=False,
+            entity_cls_resolver=entity_class,
+            key="invoice_id",
+        )},
+    )
     expected_related_entity_attributes = {
         **expected_entity_attributes,
     }
@@ -147,7 +168,7 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
 
         id: UUID
 
-        invoice: entity_class = Relation(reverse=reverse, is_nullable=False)
+        invoice: entity_class = relation(reverse=reverse, is_nullable=False)
 
     expected_related_entity_attributes["order_id"] = UUID
     expected_related_entity_attributes[reverse] = InMemoryOrder
@@ -183,6 +204,10 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
         extracted_related_entity_class_fields,
         equal_to(expected_related_entity_class_fields)
     )
+    assert_that(
+        InMemoryOrder.__conf__,
+        equal_to(expected_entity_cls_conf)
+    )
     try:
         order_id = uuid4()
         invoice_id = uuid4()
@@ -209,6 +234,20 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
         name="InMemoryPackagingOption",
         table_name="order_packaging_options",
         fields_conf=order_packaging_option_fields_conf
+    )
+    expected_entity_cls_conf = EntityClsConf(
+        relations={
+            "customization": Relation(
+                reverse="order_line",
+                entity_cls_resolver=order_customization_class,
+                key="customization_id",
+            ),
+            "packaging_option": Relation(
+                reverse="order_line",
+                entity_cls_resolver=order_packaging_option_class,
+                key="packaging_option_id",
+            ),
+        }
     )
     entity_classes = {
         "customizations": order_customization_class,
@@ -259,6 +298,10 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
         })
 
     # Assert
+    assert_that(
+        InMemoryOrderLine.__conf__,
+        equal_to(expected_entity_cls_conf)
+    )
     for relation_name, expected_related_attributes in expected_related_entities_attributes.items():
         assert_that(
             entity_classes[relation_name].__annotations__,

@@ -4,19 +4,18 @@ import re
 from typing import Callable
 
 from pymnesia.composition import runner
-from pymnesia.query.filter.registry import FILTER_FUNCTIONS_REGISTRY
+from pymnesia.query.filter.registry import find_filter_function
 from pymnesia.query.functions import order_by
 from pymnesia.query.runner import QueryRunner
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
 from pymnesia.query.filter.functions import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from pymnesia.query.filter.relations import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
 class Query:
-    """
-    Allows to store a query parameters and run the query using a QueryRunner.
+    """Allows to store a query parameters and run the query using a QueryRunner.
     """
 
-    def __init__(self, entity_class, unit_of_work: UnitOfWorkMemento):
+    def __init__(self, entity_class, unit_of_work):
         self.__entity_class = entity_class
         self.__unit_of_work = unit_of_work
         self.__query_runner = QueryRunner(
@@ -29,9 +28,9 @@ class Query:
         self.__order_by_functions = []
 
     def fetch(self) -> list:
-        """
-        Returns multiple results based on a series of parameters,
+        """Returns multiple results based on a series of parameters,
         such as a where clause, a limit, and order_by, etc...
+
         :return: A list of entities
         """
         return self.__query_runner.fetch(
@@ -42,9 +41,9 @@ class Query:
         )
 
     def fetch_one(self):
-        """
-        Returns the first result of a query based on a series of parameters,
+        """Returns the first result of a query based on a series of parameters,
         such as a where clause, an order_by, etc...
+
         :return: A single entity
         """
         return self.__query_runner.fetch_one(
@@ -53,9 +52,9 @@ class Query:
         )
 
     def where(self, clause: dict):
-        """
-        Processes and stores the parameters for a 'where' clause.
+        """Processes and stores the parameters for a 'where' clause.
         Each condition in the where clause is matched with a filter function.
+
         :param clause: The where clause to use for the query.
         :return: The query to use for chaining.
         """
@@ -64,8 +63,8 @@ class Query:
         return self
 
     def where_with_composition(self, filter_funcs: list[Callable]):
-        """
-        Adds composite functions to be used as conditional filters.
+        """Adds composite functions to be used as conditional filters.
+
         :param filter_funcs: A list of callables matching the Pymnesia filter API.
         :return: The query to use for chaining.
         """
@@ -74,8 +73,8 @@ class Query:
         return self
 
     def or_(self, clause: dict):
-        """
-        Processes and stores parameters for 'or' clauses.
+        """Processes and stores parameters for 'or' clauses.
+
         :param clause: The or clause to use for the query. This clause is to be considered as an 'or and', meaning that
         every parameter passed will be processed as additional filter.
         Eg:
@@ -88,33 +87,38 @@ class Query:
 
         return self
 
-    @staticmethod
-    def __build_filter_composite_funcs(clause: dict) -> list[Callable]:
-        """
-        Builds partial/composite functions to use for where/or clauses.
+    def __build_filter_composite_funcs(self, clause: dict) -> list[Callable]:
+        """Builds partial/composite functions to use for where/or clauses.
+
         :param clause: The clause to build the functions from.
         :return: A list of composite callables.
         """
         filter_funcs = []
         for condition, value in clause.items():
+            filter_args = {"value": value}
             matched_condition = re.match(r'^(?P<field>\w+)::(?P<operator>\w+)$', condition)
             if matched_condition:
-                filter_func = FILTER_FUNCTIONS_REGISTRY[matched_condition.group("operator")]
-                field = matched_condition.group("field")
+                filter_func = find_filter_function(filter_name=matched_condition.group("operator"))
+                filter_args["field"] = matched_condition.group("field")
             else:
-                filter_func = FILTER_FUNCTIONS_REGISTRY["eq"]
-                field = condition
+                filter_func = find_filter_function(filter_name="eq")
+                filter_args["field"] = condition
+                matched_rel_property = re.match(r'^(?P<rel>\w+)\.(?P<rel_property>.*)$', condition)
+                if matched_rel_property:
+                    filter_func = find_filter_function(filter_name="eq", relational=True)
+                    filter_args["unit_of_work"] = self.__unit_of_work
+                    filter_args["field"] = matched_rel_property.group("rel_property")
+                    filter_args["relation"] = self.__entity_class.__conf__.relations[matched_rel_property.group("rel")]
             filter_funcs.append(runner(
                 filter_func,
-                field=field,
-                value=value,
+                **filter_args
             ))
 
         return filter_funcs
 
     def order_by(self, direction: str, order_by_key: str):
-        """
-        Stores parameters to use for ordering (sorting) a query result by a key.
+        """Stores parameters to use for ordering (sorting) a query result by a key.
+
         :param direction: Whether the result should be ordered by in an ascending or descending manner.
         :param order_by_key: The property to use for ordering.
         :return: The query to use for chaining.
@@ -128,8 +132,8 @@ class Query:
         return self
 
     def limit(self, limit: int):
-        """
-        Adds a limit to a query.
+        """Adds a limit to a query.
+
         :param limit: The limit to set, 0 if not limit.
         :return: The query to use for chaining.
         """

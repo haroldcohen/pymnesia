@@ -7,6 +7,8 @@ from hamcrest import assert_that, equal_to
 
 from tests.common_utils.entities.order import InMemoryOrder
 from tests.common_utils.entities.product import InMemoryProduct
+from tests.common_utils.entities.invoice import InMemoryInvoice
+from tests.common_utils.entities.product_spec import InMemoryProductSpec
 from pymnesia.unit_of_work.unit_of_work import UnitOfWork
 from pymnesia.transaction.transaction import InMemoryTransaction
 from tests.common_utils.fixtures.unit_of_work.expected import *
