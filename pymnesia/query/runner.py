@@ -48,16 +48,17 @@ class QueryRunner:
         :return: None
         """
         for relation_name, relation in self.__entity_class.__conf__.relations.items():
-            relation_key_value = getattr(entity, relation.key)
-            if relation_key_value is not None:
-                setattr(
-                    entity,
-                    relation_name,
-                    getattr(
-                        self.__unit_of_work,
-                        relation.entity_cls_resolver.__tablename__
-                    )[getattr(entity, relation.key)]
-                )
+            if relation.is_owner:
+                relation_key_value = getattr(entity, relation.key)
+                if relation_key_value is not None:
+                    setattr(
+                        entity,
+                        relation_name,
+                        getattr(
+                            self.__unit_of_work,
+                            relation.entity_cls_resolver.__tablename__
+                        )[getattr(entity, relation.key)]
+                    )
 
     def fetch(self, *args, or_function_groups: list, order_by_functions: list, limit: int) -> list:
         """Returns multiple results based on a series of parameters,

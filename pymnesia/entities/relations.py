@@ -14,3 +14,5 @@ class Relation:
     entity_cls_resolver: EntityClassResolver = field(default=None)
 
     key: str = field(default=None)
+
+    is_owner: bool = field(default=False)

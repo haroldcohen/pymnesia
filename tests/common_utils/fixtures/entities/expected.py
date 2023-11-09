@@ -3,7 +3,8 @@
 import pytest
 
 from tests.common_utils.helpers import extract_entity_class_fields, extract_expected_dataclass_fields
-from tests.common_utils.helpers.make import is_type_and_field_tuple, FieldsConf
+from tests.common_utils.helpers.expected import build_expected_entity_cls_attributes
+from tests.common_utils.helpers.make import FieldsConf
 
 __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
            "where_clause", "or_clauses", "expected_entity_attributes", "expected_dataclass_fields",
@@ -11,7 +12,11 @@ __all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_
 
 
 @pytest.fixture()
-def expected_entity(request, expected_unit_of_work_memento, use_properties):
+def expected_entity(
+        request,
+        expected_unit_of_work_memento,
+        use_properties
+):  # pylint: disable=redefined-outer-name
     """Returns an entity instance to be used for assertion (and action as well)."""
     if hasattr(request, "param"):
         entity = request.param
@@ -27,7 +32,12 @@ def expected_entity(request, expected_unit_of_work_memento, use_properties):
 
 
 @pytest.fixture()
-def expected_entities(request, expected_unit_of_work_memento, use_properties, use_dedicated_properties):
+def expected_entities(
+        request,
+        expected_unit_of_work_memento,
+        use_properties,
+        use_dedicated_properties
+):  # pylint: disable=redefined-outer-name
     """Returns multiple entity instances to be used for assertion (and action as well)."""
     if hasattr(request, "param"):
         properties_idx = 0
@@ -67,7 +77,7 @@ def direction(request):
 
 
 @pytest.fixture()
-def use_properties(request, where_clause):
+def use_properties(request, where_clause):  # pylint: disable=redefined-outer-name
     if hasattr(request, "param"):
         return request.param
     if len(where_clause):
@@ -94,14 +104,7 @@ def or_clauses(request):
 
 @pytest.fixture()
 def expected_entity_attributes(fields_conf):
-    expected_attrs = {}
-    for field_name, field_conf in fields_conf.items():
-        if is_type_and_field_tuple(field_conf):
-            expected_attrs[field_name] = field_conf[0]
-        else:
-            expected_attrs[field_name] = field_conf
-
-    return expected_attrs
+    return build_expected_entity_cls_attributes(fields_conf=fields_conf)
 
 
 @pytest.fixture()
@@ -129,3 +132,4 @@ def expected_entity_instance(entity_class, instance_values):
 def use_dedicated_properties(request):
     if hasattr(request, "param"):
         return request.param
+    return []

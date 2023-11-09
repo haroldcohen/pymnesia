@@ -40,6 +40,7 @@ class EntityMeta(type):
                     ))
                 if isinstance(field_as_attr, Relation):
                     relations[field_type] = field_as_attr
+                    field_as_attr.is_owner = True
                     _add_foreign_key_to_fields(
                         relation_name=field_name,
                         fields=fields,
@@ -48,8 +49,8 @@ class EntityMeta(type):
                     relation_fields[field_type] = field_name
             else:
                 if issubclass(field_type, Entity):
-                    relations[field_type] = Relation(reverse=tablename[0:-1])
-                    _add_foreign_key_to_fields(relation_name=field_name, fields=fields, is_nullable=False)
+                    relations[field_type] = Relation(reverse=tablename[0:-1], is_owner=True)
+                    _add_foreign_key_to_fields(relation_name=field_name, fields=fields, is_nullable=True)
                     relation_fields[field_type] = field_name
                 else:
                     fields.append((
@@ -97,7 +98,7 @@ def _make_relations(
     for relation, relation_field in relations.items():
         relation_current_fields = _extract_entity_cls_fields(relation)
         _add_foreign_key_to_fields(
-            relation_name=tablename[0:-1],
+            relation_name=relation_field.reverse,
             fields=relation_current_fields,
             is_nullable=relation_field.is_nullable,
         )
@@ -123,6 +124,12 @@ def _make_relations(
             relation=relation,
             relation_name=relation_fields[relation],
             relation_field=relation_field
+        )
+        _add_relation_to_entity_cls_conf(
+            conf=relation_new_cls.__conf__,
+            relation=cls_resolver,
+            relation_name=relation_field.reverse,
+            relation_field=Relation(reverse=relation_new_cls.__tablename__[0:-1])
         )
 
     updated_entity_cls = _make_entity_dataclass(
