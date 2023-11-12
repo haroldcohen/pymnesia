@@ -4,9 +4,10 @@ from typing import Type
 
 from pymnesia.entities.entity import Entity
 from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
+from pymnesia.entities.entity_cls_resolver_interface import EntityClassResolverInterface
 
 
-class EntityClassResolver:
+class EntityClassResolver(EntityClassResolverInterface):
     """Resolver that instantiates the proper entity class when called.
     """
 

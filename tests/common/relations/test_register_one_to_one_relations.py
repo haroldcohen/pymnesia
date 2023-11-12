@@ -12,8 +12,7 @@ from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
 from pymnesia.api.entities import relation
-from tests.common_utils.helpers.validate import validate_entity_cls, validate_entity_cls_conf, \
-    validate_entity_cls_attributes, validate_entity_cls_fields
+from tests.common_utils.helpers.validate import validate_entity_cls
 
 
 @pytest.fixture()
@@ -73,24 +72,24 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
     fields_conf["order"] = (InMemoryOrder, Relation(reverse="invoice", is_owner=False))
 
     # Assert
-    validate_entity_cls(
-        entity_cls_resolver=entity_class,
-        fields_conf=fields_conf,
-        owned_relations=[]
-    )
     # noinspection PyTypeChecker
     validate_entity_cls(
         entity_cls_resolver=InMemoryOrder,
         fields_conf=in_memory_order_fields_conf,
         owned_relations=["invoice"],
     )
+    validate_entity_cls(
+        entity_cls_resolver=entity_class,
+        fields_conf=fields_conf,
+        owned_relations=[]
+    )
     try:
         order_id = uuid4()
         invoice_id = uuid4()
-        InMemoryOrder(id=order_id)
+        instance_values["order"] = order_id
+        instance_values["order_id"] = order_id
         InMemoryOrder(id=order_id, invoice_id=invoice_id)
         entity_class(**instance_values)
-        entity_class(**instance_values, order_id=order_id)
     except TypeError:
         assert False
     # Cleanup
@@ -135,36 +134,23 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
         "invoice": (entity_class, relation_field)
     }
     # Assert
-    # WARNING !!!
-    # validate_entity_cls(
-    #     entity_cls_resolver=entity_class,
-    #     fields_conf=fields_conf,
-    #     owned_relations=[],
-    # )
-    validate_entity_cls_attributes(
-        entity_cls_resolver=entity_class,
-        fields_conf=fields_conf,
-    )
     # noinspection PyTypeChecker
-    validate_entity_cls_attributes(
-        entity_cls_resolver=InMemoryOrder,
-        fields_conf=in_memory_order_fields_conf,
-    )
-    # noinspection PyTypeChecker
-    validate_entity_cls_conf(
+    validate_entity_cls(
         entity_cls_resolver=InMemoryOrder,
         fields_conf=in_memory_order_fields_conf,
         owned_relations=["invoice"],
     )
+    # noinspection PyTypeChecker
     fields_conf[reverse] = (InMemoryOrder, Relation(reverse="invoice", is_owner=False))
-    validate_entity_cls_conf(
+    validate_entity_cls(
         entity_cls_resolver=entity_class,
         fields_conf=fields_conf,
-        owned_relations=[]
+        owned_relations=[],
     )
     try:
         order_id = uuid4()
         invoice_id = uuid4()
+        instance_values[reverse] = order_id
         instance_values[reverse + "_id"] = order_id
         InMemoryOrder(id=order_id, invoice_id=invoice_id)
         entity_class(**instance_values)
@@ -228,38 +214,19 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
             entity_cls_resolver,
             relation(reverse="order_line")
         )
-        # noinspection PyTypeChecker
         rel_entity_cls_info["fields_conf"]["order_line"] = (
-            in_memory_order_line_class, Relation(reverse=rel_entity_cls_info["single_form"], is_owner=False)
+            in_memory_order_line_class,
+            Relation(reverse=rel_entity_cls_info["single_form"], is_owner=False)
         )
-        # noinspection PyTypeChecker
-        validate_entity_cls_attributes(
+        validate_entity_cls(
             entity_cls_resolver=entity_cls_resolver,
             fields_conf=rel_entity_fields_conf,
+            owned_relations=[],
         )
-        validate_entity_cls_fields(
-            entity_cls_resolver=entity_cls_resolver,
-            fields_conf=rel_entity_fields_conf,
-        )
-        # noinspection PyTypeChecker
-        validate_entity_cls_conf(
-            entity_cls_resolver=entity_cls_resolver,
-            fields_conf=rel_entity_fields_conf,
-            owned_relations=[]
-        )
-    validate_entity_cls_attributes(
+    validate_entity_cls(
         entity_cls_resolver=in_memory_order_line_class,
         fields_conf=in_memory_order_line_fields_conf,
-    )
-    # noinspection PyTypeChecker
-    validate_entity_cls_conf(
-        entity_cls_resolver=in_memory_order_line_class,
-        fields_conf=in_memory_order_line_fields_conf,
-        owned_relations=["customization", "packaging_option"]
-    )
-    validate_entity_cls_fields(
-        entity_cls_resolver=in_memory_order_line_class,
-        fields_conf=in_memory_order_line_fields_conf,
+        owned_relations=["customization", "packaging_option"],
     )
     # Cleanup
     registry.unregister(in_memory_order_line_class)

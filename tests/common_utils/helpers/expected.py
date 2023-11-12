@@ -94,10 +94,12 @@ def build_expected_entity_cls_attributes_with_relations(
 
 
 def build_expected_entity_cls_fields(
+        entity_cls_resolver: EntityClassResolver,
         fields_conf: FieldsConf,
 ):
     """Builds a list of expected dataclass fields.
 
+    :param entity_cls_resolver:
     :param fields_conf:
     :return:
     """
@@ -113,23 +115,26 @@ def build_expected_entity_cls_fields(
                     if field.default_factory is not UNDEFINED else MISSING
             else:
                 expected["type"] = field_conf[0]
+                is_owner = entity_cls_resolver.__conf__.relations[field_name].is_owner
                 expected["default"] = None
                 expected_foreign_key = {
                     "name": field_name + "_id",
                     "type": UUID,
-                    "default": None,
+                    "default": None if is_owner else MISSING,
                     "default_factory": MISSING
                 }
                 if isinstance(field_conf[1], Relation):
-                    expected["default"] = None if field_conf[1].is_nullable is True else MISSING
-                    expected_foreign_key["default"] = None if field_conf[1].is_nullable is True else MISSING
+                    expected["default"] = None
+                    expected_foreign_key["default"] = None if field_conf[1].is_nullable and is_owner else MISSING
                     expected_fields.append(expected_foreign_key)
         elif issubclass(field_conf, Entity):
-            expected["default"] = None
+            is_owner = entity_cls_resolver.__conf__.relations[field_name].is_owner
+            expected["default"] = None if is_owner else MISSING
+            # expected["default"] = None if is_owner else MISSING
             expected_foreign_key = {
                 "name": field_name + "_id",
                 "type": UUID,
-                "default": None,
+                "default": None if is_owner else MISSING,
                 "default_factory": MISSING
             }
             expected_fields.append(expected_foreign_key)

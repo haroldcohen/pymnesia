@@ -48,8 +48,15 @@ def test_query_orders_should_return_all_orders_with_a_loaded_invoice(
 ):
     properties_idx = 0
     for entity in expected_entities:
-        invoice = InMemoryInvoice(id=use_dedicated_properties[properties_idx]["invoice_id"], order_id=entity.id)
-        proforma = InMemoryProforma(id=use_dedicated_properties[properties_idx]["proforma_id"], order_id=entity.id)
+        invoice = InMemoryInvoice(
+            id=use_dedicated_properties[properties_idx]["invoice_id"],
+            order_id=entity.id
+        )
+        proforma = InMemoryProforma(
+            id=use_dedicated_properties[properties_idx]["proforma_id"],
+            invoice_id=use_dedicated_properties[properties_idx]["invoice_id"],
+            order_id=entity.id
+        )
         unit_of_work.save_entity(entity=invoice)
         unit_of_work.save_entity(entity=proforma)
         transaction.commit()

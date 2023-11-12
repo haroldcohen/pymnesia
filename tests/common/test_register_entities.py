@@ -12,8 +12,7 @@ from tests.common_utils.fixtures.misc import *
 from tests.common_utils.fixtures.registry import *
 from pymnesia.entities.field import Field
 from pymnesia.entities.entity import Entity
-from tests.common_utils.helpers.validate import validate_entity_cls_conf, validate_entity_cls_attributes, \
-    validate_entity_cls_fields
+from tests.common_utils.helpers.validate import validate_entity_cls
 
 
 @pytest.mark.parametrize(
@@ -47,37 +46,21 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
     entity_instance = entity_class(**instance_values)
     # Assert
     assert_that(
-        entity_class.__tablename__,
-        equal_to(table_name)
-    )
-    assert_that(
-        hasattr(entity_class, "config"),
-        equal_to(False)
-    )
-    assert_that(
         issubclass(entity_class, Entity),
         equal_to(True)
     )
     assert_that(
-        entity_class(**instance_values),
+        entity_instance,
         equal_to(expected_entity_instance)
     )
     assert_that(
         is_dataclass(entity_instance),
         equal_to(True)
     )
-    validate_entity_cls_attributes(
-        entity_cls_resolver=entity_class,
-        fields_conf=fields_conf,
-    )
-    validate_entity_cls_conf(
+    validate_entity_cls(
         entity_cls_resolver=entity_class,
         fields_conf=fields_conf,
         owned_relations=[]
-    )
-    validate_entity_cls_fields(
-        entity_cls_resolver=entity_class,
-        fields_conf=fields_conf,
     )
     assert_that(
         getattr(unit_of_work, table_name),

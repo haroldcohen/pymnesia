@@ -52,11 +52,14 @@ from tests.common_utils.fixtures.misc import *
              InMemoryOrder(id=uuid4()),
              InMemoryProforma(
                  id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
+                 invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
                  total_with_vat=32,
+                 order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
              ),
              InMemoryInvoice(
                  id=uuid4(),
                  number="2023-00001",
+                 order_id=uuid4(),
              ),
              InMemoryInvoice(
                  id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
@@ -64,7 +67,9 @@ from tests.common_utils.fixtures.misc import *
                  proforma_id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
                  proforma=InMemoryProforma(
                      id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
+                     invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
                      total_with_vat=32,
+                     order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
                  ),
                  number="2023-00001",
              ),

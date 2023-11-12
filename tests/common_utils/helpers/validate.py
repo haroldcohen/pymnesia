@@ -102,6 +102,7 @@ def validate_entity_cls_fields(
     :return: None
     """
     expected_entity_cls_fields = build_expected_entity_cls_fields(
+        entity_cls_resolver=entity_cls_resolver,
         fields_conf=fields_conf,
     )
 

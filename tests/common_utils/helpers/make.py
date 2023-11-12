@@ -3,7 +3,7 @@
 from dataclasses import MISSING
 from typing import Any, Dict, Union, Tuple
 
-from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.entities.entity import Entity
 from pymnesia.entities.field import Field, UNDEFINED
 from pymnesia.entities.relations import Relation
 from pymnesia.entities.base import DeclarativeBase
@@ -69,7 +69,8 @@ def is_type_and_field_tuple(field_conf: Any) -> bool:
     :return: A boolean indicating if it is a simple type or not.
     """
     if isinstance(field_conf, tuple):
-        if isinstance(field_conf[0], (type, EntityClassResolver)) and isinstance(field_conf[1], (Field, Relation)):
+        if isinstance(field_conf[0], type) or issubclass(field_conf[0], Entity) and \
+                isinstance(field_conf[1], (Field, Relation)):
             return True
         return False
     return False
@@ -83,6 +84,6 @@ def is_relation_field_conf(field_conf: Any) -> bool:
     """
     is_type_field_tuple = is_type_and_field_tuple(field_conf)
     if is_type_field_tuple:
-        return isinstance(field_conf[0], EntityClassResolver)
+        return issubclass(field_conf[0], Entity)
 
-    return isinstance(field_conf, EntityClassResolver)
+    return issubclass(field_conf[0], Entity)
