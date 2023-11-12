@@ -2,7 +2,7 @@
 """
 from dataclasses import dataclass, field
 
-from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.entities.entity_cls_resolver_interface import EntityClassResolverInterface
 
 
 @dataclass()
@@ -11,6 +11,8 @@ class Relation:
 
     is_nullable: bool = field(default=True)
 
-    entity_cls_resolver: EntityClassResolver = field(default=None)
+    entity_cls_resolver: EntityClassResolverInterface = field(default=None)
 
     key: str = field(default=None)
+
+    is_owner: bool = field(default=False)

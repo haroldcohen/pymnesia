@@ -1,22 +1,18 @@
 """Provides with unit tests to validate 'one to one' relationships feature.
 """
-from dataclasses import MISSING
 from uuid import UUID, uuid4
-
-from hamcrest import assert_that, equal_to
 
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
 from tests.common_utils.fixtures.registry import *
-from tests.common_utils.helpers import extract_entity_class_fields, extract_expected_dataclass_fields
 from tests.common_utils.helpers.make import make_entity_class
 from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
-from pymnesia.entities.entity_cls_conf import EntityClsConf
 from pymnesia.api.entities import relation
+from tests.common_utils.helpers.validate import validate_entity_cls
 
 
 @pytest.fixture()
@@ -37,7 +33,7 @@ def use_relation_api(request):
         }, {"id": uuid4()}, True),
         ("Invoice", "invoices", {
             "id": UUID,
-        }, {"id": uuid4()}, True),
+        }, {"id": uuid4()}, False),
     ],
     indirect=True,
 )
@@ -52,18 +48,6 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
         unregister_entity_class,
         use_relation_api,
 ):
-    # Arrange
-    expected_entity_cls_conf = EntityClsConf(
-        relations={"invoice": Relation(
-            reverse="order",
-            entity_cls_resolver=entity_class,
-            key="invoice_id",
-        )},
-    )
-    expected_related_entity_attributes = {
-        **expected_entity_attributes,
-    }
-
     # Act
     class InMemoryOrder(DeclarativeBase):
         __tablename__ = "orders"
@@ -75,51 +59,37 @@ def test_register_entity_with_a_one_to_one_relation_should_update_the_registry_w
         else:
             invoice: entity_class
 
-    expected_related_entity_attributes["order_id"] = UUID
-    expected_related_entity_attributes["order"] = InMemoryOrder
-    expected_order_entity_attributes = {
+    in_memory_order_fields_conf = {
         "id": UUID,
-        "invoice_id": UUID,
-        "invoice": entity_class,
     }
-    expected_related_entity_class_fields = extract_expected_dataclass_fields(fields_conf)
-    expected_related_entity_class_fields.append({
-        "name": "order_id",
-        "type": UUID,
-        "default": None,
-        "default_factory": MISSING,
-    })
-    expected_related_entity_class_fields.append({
-        "name": "order",
-        "type": InMemoryOrder,
-        "default": None,
-        "default_factory": MISSING,
-    })
-    extracted_related_entity_class_fields = extract_entity_class_fields(entity_class)
+
+    if use_relation_api:
+        in_memory_order_fields_conf["invoice"] = (entity_class, relation(reverse="order"))
+    else:
+        in_memory_order_fields_conf["invoice"] = entity_class
+
+    # noinspection PyTypeChecker
+    fields_conf["order"] = (InMemoryOrder, Relation(reverse="invoice", is_owner=False))
+
     # Assert
-    assert_that(
-        entity_class.__annotations__,
-        equal_to(expected_related_entity_attributes)
+    # noinspection PyTypeChecker
+    validate_entity_cls(
+        entity_cls_resolver=InMemoryOrder,
+        fields_conf=in_memory_order_fields_conf,
+        owned_relations=["invoice"],
     )
-    assert_that(
-        InMemoryOrder.__annotations__,
-        equal_to(expected_order_entity_attributes)
-    )
-    assert_that(
-        extracted_related_entity_class_fields,
-        equal_to(expected_related_entity_class_fields)
-    )
-    assert_that(
-        InMemoryOrder.__conf__,
-        equal_to(expected_entity_cls_conf)
+    validate_entity_cls(
+        entity_cls_resolver=entity_class,
+        fields_conf=fields_conf,
+        owned_relations=[]
     )
     try:
         order_id = uuid4()
         invoice_id = uuid4()
-        InMemoryOrder(id=order_id)
+        instance_values["order"] = order_id
+        instance_values["order_id"] = order_id
         InMemoryOrder(id=order_id, invoice_id=invoice_id)
         entity_class(**instance_values)
-        entity_class(**instance_values, order_id=order_id)
     except TypeError:
         assert False
     # Cleanup
@@ -149,70 +119,41 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
         unregister_entity_class,
         reverse,
 ):
-    # Arrange
-    expected_entity_cls_conf = EntityClsConf(
-        relations={"invoice": Relation(
-            reverse=reverse,
-            is_nullable=False,
-            entity_cls_resolver=entity_class,
-            key="invoice_id",
-        )},
-    )
-    expected_related_entity_attributes = {
-        **expected_entity_attributes,
-    }
-
     # Act
+    relation_field = relation(reverse=reverse, is_nullable=False)
+
     class InMemoryOrder(DeclarativeBase):
         __tablename__ = "orders"
 
         id: UUID
 
-        invoice: entity_class = relation(reverse=reverse, is_nullable=False)
+        invoice: entity_class = relation_field
 
-    expected_related_entity_attributes["order_id"] = UUID
-    expected_related_entity_attributes[reverse] = InMemoryOrder
-    expected_order_entity_attributes = {
+    in_memory_order_fields_conf = {
         "id": UUID,
-        "invoice_id": UUID,
-        "invoice": entity_class,
+        "invoice": (entity_class, relation_field)
     }
-    expected_related_entity_class_fields = extract_expected_dataclass_fields(fields_conf)
-    expected_related_entity_class_fields.append({
-        "name": "order_id",
-        "type": UUID,
-        "default": MISSING,
-        "default_factory": MISSING,
-    })
-    expected_related_entity_class_fields.append({
-        "name": reverse,
-        "type": InMemoryOrder,
-        "default": None,
-        "default_factory": MISSING,
-    })
-    extracted_related_entity_class_fields = extract_entity_class_fields(entity_class)
     # Assert
-    assert_that(
-        entity_class.__annotations__,
-        equal_to(expected_related_entity_attributes)
+    # noinspection PyTypeChecker
+    validate_entity_cls(
+        entity_cls_resolver=InMemoryOrder,
+        fields_conf=in_memory_order_fields_conf,
+        owned_relations=["invoice"],
     )
-    assert_that(
-        InMemoryOrder.__annotations__,
-        equal_to(expected_order_entity_attributes)
-    )
-    assert_that(
-        extracted_related_entity_class_fields,
-        equal_to(expected_related_entity_class_fields)
-    )
-    assert_that(
-        InMemoryOrder.__conf__,
-        equal_to(expected_entity_cls_conf)
+    # noinspection PyTypeChecker
+    fields_conf[reverse] = (InMemoryOrder, Relation(reverse="invoice", is_owner=False))
+    validate_entity_cls(
+        entity_cls_resolver=entity_class,
+        fields_conf=fields_conf,
+        owned_relations=[],
     )
     try:
         order_id = uuid4()
         invoice_id = uuid4()
+        instance_values[reverse] = order_id
+        instance_values[reverse + "_id"] = order_id
         InMemoryOrder(id=order_id, invoice_id=invoice_id)
-        entity_class(**instance_values, order_id=order_id)
+        entity_class(**instance_values)
     except TypeError:
         assert False
     # Cleanup
@@ -223,95 +164,71 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
     """Tests whether multiple 'one to one' relationships can be declared.
     """
     # Arrange
-    order_customization_fields_conf = {"id": UUID}
+    related_entities_cls_info = {
+        "InMemoryOrderCustomization": {
+            "table_name": "customizations",
+            "single_form": "customization",
+            "fields_conf": {"id": UUID},
+            "cls_resolver": None,
+        },
+        "InMemoryPackagingOption": {
+            "table_name": "packaging_options",
+            "single_form": "packaging_option",
+            "fields_conf": {"id": UUID},
+            "cls_resolver": None,
+        },
+    }
     order_customization_class = make_entity_class(
         name="InMemoryOrderCustomization",
         table_name="customizations",
-        fields_conf=order_customization_fields_conf
+        fields_conf=related_entities_cls_info["InMemoryOrderCustomization"]["fields_conf"],
     )
-    order_packaging_option_fields_conf = {"id": UUID}
+    related_entities_cls_info["InMemoryOrderCustomization"]["cls_resolver"] = order_customization_class
     order_packaging_option_class = make_entity_class(
         name="InMemoryPackagingOption",
-        table_name="order_packaging_options",
-        fields_conf=order_packaging_option_fields_conf
+        table_name="packaging_options",
+        fields_conf=related_entities_cls_info["InMemoryPackagingOption"]["fields_conf"]
     )
-    expected_entity_cls_conf = EntityClsConf(
-        relations={
-            "customization": Relation(
-                reverse="order_line",
-                entity_cls_resolver=order_customization_class,
-                key="customization_id",
-            ),
-            "packaging_option": Relation(
-                reverse="order_line",
-                entity_cls_resolver=order_packaging_option_class,
-                key="packaging_option_id",
-            ),
-        }
-    )
-    entity_classes = {
-        "customizations": order_customization_class,
-        "order_packaging_options": order_packaging_option_class
-    }
-    expected_related_entities_attributes = {
-        "customizations": {
-            "id": UUID,
-        },
-        "order_packaging_options": {
-            "id": UUID,
-        }
-    }
-    expected_related_entities_fields = {
-        "customizations": extract_expected_dataclass_fields(order_customization_fields_conf),
-        "order_packaging_options": extract_expected_dataclass_fields(order_packaging_option_fields_conf),
-    }
+    related_entities_cls_info["InMemoryPackagingOption"]["cls_resolver"] = order_packaging_option_class
+    in_memory_order_line_fields_conf = {"id": UUID}
+
+    for rel_entity_cls_name, rel_entity_cls_info in related_entities_cls_info.items():
+        entity_cls_resolver = rel_entity_cls_info["cls_resolver"]
+        in_memory_order_line_fields_conf[rel_entity_cls_info["single_form"]] = (
+            entity_cls_resolver,
+            relation(reverse="order_line")
+        )
 
     # Act
-    class InMemoryOrderLine(DeclarativeBase):
-        __tablename__ = "order_lines"
-
-        id: UUID
-
-        customization: order_customization_class
-
-        packaging_option: order_packaging_option_class
-
-    extracted_related_entities_fields = {
-        "customizations": extract_entity_class_fields(order_customization_class),
-        "order_packaging_options": extract_entity_class_fields(order_packaging_option_class),
-    }
-
-    for relation_name in entity_classes:
-        expected_related_entities_attributes[relation_name]["order_line"] = InMemoryOrderLine
-        expected_related_entities_attributes[relation_name]["order_line_id"] = UUID
-        expected_related_entities_fields[relation_name].append({
-            "name": "order_id",
-            "type": UUID,
-            "default": MISSING,
-            "default_factory": MISSING,
-        })
-        expected_related_entities_fields[relation_name].append({
-            "name": reverse,
-            "type": InMemoryOrderLine,
-            "default": None,
-            "default_factory": MISSING,
-        })
+    in_memory_order_line_class = make_entity_class(
+        name="InMemoryOrderLine",
+        table_name="order_lines",
+        fields_conf=in_memory_order_line_fields_conf,
+    )
 
     # Assert
-    assert_that(
-        InMemoryOrderLine.__conf__,
-        equal_to(expected_entity_cls_conf)
+    for rel_entity_cls_name, rel_entity_cls_info in related_entities_cls_info.items():
+        entity_cls_resolver = rel_entity_cls_info["cls_resolver"]
+        rel_entity_fields_conf = rel_entity_cls_info["fields_conf"]
+        in_memory_order_line_fields_conf[rel_entity_cls_info["single_form"]] = (
+            entity_cls_resolver,
+            relation(reverse="order_line")
+        )
+        rel_entity_cls_info["fields_conf"]["order_line"] = (
+            in_memory_order_line_class,
+            Relation(reverse=rel_entity_cls_info["single_form"], is_owner=False)
+        )
+        validate_entity_cls(
+            entity_cls_resolver=entity_cls_resolver,
+            fields_conf=rel_entity_fields_conf,
+            owned_relations=[],
+        )
+    validate_entity_cls(
+        entity_cls_resolver=in_memory_order_line_class,
+        fields_conf=in_memory_order_line_fields_conf,
+        owned_relations=["customization", "packaging_option"],
     )
-    for relation_name, expected_related_attributes in expected_related_entities_attributes.items():
-        assert_that(
-            entity_classes[relation_name].__annotations__,
-            equal_to(expected_related_attributes)
-        )
-        assert_that(
-            extracted_related_entities_fields[relation_name],
-            equal_to(extracted_related_entities_fields[relation_name])
-        )
     # Cleanup
-    registry.unregister(InMemoryOrderLine)
-    for relation_entity_class in entity_classes.values():
-        registry.unregister(relation_entity_class)
+    registry.unregister(in_memory_order_line_class)
+    for rel_entity_cls_name, rel_entity_cls_info in related_entities_cls_info.items():
+        registry.unregister(rel_entity_cls_info["cls_resolver"])

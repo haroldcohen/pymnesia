@@ -1,6 +1,6 @@
 """Provides with unit tests to validate the query with a where and or clause feature for entities that have relations.
 """
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from hamcrest import assert_that, equal_to
@@ -26,6 +26,7 @@ from tests.common_utils.fixtures.misc import *
              InMemoryInvoice(
                  id=UUID("e54c93cb-470f-44f2-831b-bd2f36ce4547"),
                  number="2026-00002",
+                 order_id=uuid4(),
              ),
              InMemoryInvoice(
                  id=UUID("5f61bc32-a712-42a2-8e58-74a28fc643b9"),

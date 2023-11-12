@@ -18,7 +18,7 @@ def extract_entity_class_fields(entity_class) -> List[Dict]:
             "default_factory": entity_field.default_factory,
         })
 
-    return fields_to_assert
+    return sorted(fields_to_assert, key=lambda e: e["name"])
 
 
 def extract_expected_dataclass_fields(fields_conf: FieldsConf) -> List[Dict]:
@@ -33,4 +33,4 @@ def extract_expected_dataclass_fields(fields_conf: FieldsConf) -> List[Dict]:
                 if field.default_factory is not UNDEFINED else MISSING
         expected_fields.append(expected)
 
-    return expected_fields
+    return sorted(expected_fields, key=lambda e: e["name"])
