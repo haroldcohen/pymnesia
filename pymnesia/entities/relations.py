@@ -7,7 +7,10 @@ from pymnesia.entities.entity_cls_resolver_interface import EntityClassResolverI
 
 @dataclass()
 class Relation:
+
     reverse: str
+
+    relation_type: str = field(default="one_to_one")
 
     is_nullable: bool = field(default=True)
 

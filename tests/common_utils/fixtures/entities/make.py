@@ -4,7 +4,15 @@ import pytest
 
 from tests.common_utils.helpers.make import make_entity_class, FieldsConf
 
-__all__ = ["entity_class_name", "table_name", "fields_conf", "entity_class", "instance_values"]
+__all__ = [
+    "entity_class_name",
+    "table_name",
+    "fields_conf",
+    "reverse",
+    "use_relation_api",
+    "entity_class",
+    "instance_values",
+]
 
 
 @pytest.fixture()
@@ -30,7 +38,17 @@ def fields_conf(request) -> FieldsConf:
 
 
 @pytest.fixture()
-def entity_class(entity_class_name, table_name, fields_conf: FieldsConf):
+def reverse(request):
+    return request.param
+
+
+@pytest.fixture()
+def use_relation_api(request):
+    return request.param
+
+
+@pytest.fixture()
+def entity_class(entity_class_name, table_name, fields_conf: FieldsConf):  # pylint: disable=redefined-outer-name
     """Returns a dynamically made entity class.
 
     :param entity_class_name: The class name to use for making the class.

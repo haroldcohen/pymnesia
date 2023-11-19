@@ -11,4 +11,7 @@ def relation(reverse: str, is_nullable: bool = True) -> Relation:
     :param is_nullable:
     :return:
     """
-    return Relation(reverse=reverse, is_nullable=is_nullable)
+    return Relation(
+        reverse=reverse,
+        is_nullable=is_nullable,
+    )

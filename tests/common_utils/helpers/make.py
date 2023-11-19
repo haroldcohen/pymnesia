@@ -1,7 +1,7 @@
 """Provides with dynamically constructed entity classes.
 """
 from dataclasses import MISSING
-from typing import Any, Dict, Union, Tuple
+from typing import Any, Dict, Union, Tuple, get_origin, get_args
 
 from pymnesia.entities.entity import Entity
 from pymnesia.entities.field import Field, UNDEFINED
@@ -69,7 +69,12 @@ def is_type_and_field_tuple(field_conf: Any) -> bool:
     :return: A boolean indicating if it is a simple type or not.
     """
     if isinstance(field_conf, tuple):
-        if isinstance(field_conf[0], type) or issubclass(field_conf[0], Entity) and \
+        field_conf_type = field_conf[0]
+        origin_type = get_origin(field_conf_type)
+        if origin_type == list:
+            typing_args = get_args(field_conf_type)
+            field_conf_type = typing_args[0]
+        if isinstance(field_conf[0], type) or issubclass(field_conf_type, Entity) and \
                 isinstance(field_conf[1], (Field, Relation)):
             return True
         return False
@@ -84,6 +89,11 @@ def is_relation_field_conf(field_conf: Any) -> bool:
     """
     is_type_field_tuple = is_type_and_field_tuple(field_conf)
     if is_type_field_tuple:
-        return issubclass(field_conf[0], Entity)
+        field_conf_type = field_conf[0]
+        origin_type = get_origin(field_conf_type)
+        if origin_type == list:
+            typing_args = get_args(field_conf_type)
+            field_conf_type = typing_args[0]
+        return issubclass(field_conf_type, Entity)
 
     return issubclass(field_conf[0], Entity)
