@@ -1,7 +1,7 @@
 """Provides with assertion related utility functions.
 """
 from dataclasses import MISSING
-from typing import Dict, List, get_origin, get_args
+from typing import Dict, List, get_origin, get_args, Tuple
 from uuid import UUID
 
 from pymnesia.entities.entity import Entity
@@ -34,57 +34,84 @@ def build_expected_entity_cls_conf(
     """
     expected_entity_cls_conf = EntityClsConf()
     for field_name, field_conf in fields_conf.items():
-        origin_type = get_origin(field_conf)
         if is_type_and_field_tuple(field_conf):
             if is_relation_field_conf(field_conf):
-                expected_relation_args = {
-                    "key": field_name + "_id",
-                    "entity_cls_resolver": entity_cls_resolver.__annotations__[field_name],
-                    "is_owner": field_name in owned_relations,
-                }
+                expected_relation_args = {}
                 if isinstance(field_conf[0], EntityClassResolver):
-                    expected_relation_args["reverse"] = build_expected_reverse_from_table_name(
-                        table_name=entity_cls_resolver.__tablename__,
+                    expected_relation_args = build_expected_one_to_one_relation_args(
+                        field_name=field_name,
+                        owned_relations=owned_relations,
+                        entity_cls_resolver=entity_cls_resolver,
                     )
                 if get_origin(field_conf[0]) == list:
                     typing_args = get_args(field_conf[0])
-                    expected_relation_args = {
-                        "relation_type": "one_to_many",
-                        "key": field_name[0:-1] + "_ids",
-                        "entity_cls_resolver": typing_args[0],
-                        "is_owner": field_name in owned_relations,
-                        "reverse": build_expected_reverse_from_table_name(
-                            table_name=entity_cls_resolver.__tablename__,
-                        ),
-                    }
+                    expected_relation_args = build_expected_one_to_many_relation_args(
+                        field_name=field_name,
+                        typing_args=typing_args,
+                        owned_relations=owned_relations,
+                        entity_cls_resolver=entity_cls_resolver,
+                    )
                 if isinstance(field_conf[1], Relation):
                     expected_relation_args["reverse"] = field_conf[1].reverse
                     expected_relation_args["is_nullable"] = field_conf[1].is_nullable
+                    expected_relation_args["relation_type"] = field_conf[1].relation_type
                 expected_entity_cls_conf.relations[field_name] = Relation(**expected_relation_args)
-        elif origin_type == list:
+        elif get_origin(field_conf) == list:
             typing_args = get_args(field_conf)
-            expected_relation_args = {
-                "relation_type": "one_to_many",
-                "key": field_name[0:-1] + "_ids",
-                "entity_cls_resolver": typing_args[0],
-                "is_owner": field_name in owned_relations,
-                "reverse": build_expected_reverse_from_table_name(
-                    table_name=entity_cls_resolver.__tablename__,
-                ),
-            }
+            expected_relation_args = build_expected_one_to_many_relation_args(
+                field_name=field_name,
+                typing_args=typing_args,
+                owned_relations=owned_relations,
+                entity_cls_resolver=entity_cls_resolver,
+            )
             expected_entity_cls_conf.relations[field_name] = Relation(**expected_relation_args)
-        elif issubclass(field_conf, Entity):
-            expected_relation_args = {
-                "key": field_name + "_id",
-                "entity_cls_resolver": entity_cls_resolver.__annotations__[field_name],
-                "is_owner": field_name in owned_relations,
-                "reverse": build_expected_reverse_from_table_name(
-                    table_name=entity_cls_resolver.__tablename__,
-                ),
-            }
+        elif isinstance(field_conf, EntityClassResolver):
+            expected_relation_args = build_expected_one_to_one_relation_args(
+                field_name=field_name,
+                owned_relations=owned_relations,
+                entity_cls_resolver=entity_cls_resolver,
+            )
             expected_entity_cls_conf.relations[field_name] = Relation(**expected_relation_args)
 
     return expected_entity_cls_conf
+
+
+def build_expected_one_to_one_relation_args(
+        field_name: str,
+        owned_relations: List[str],
+        entity_cls_resolver: EntityClassResolver,
+) -> dict:
+    return {
+        "key": build_expected_foreign_key_name(
+            relation_name=field_name,
+            relation_type="one_to_one"
+        ),
+        "entity_cls_resolver": entity_cls_resolver.__annotations__[field_name],
+        "is_owner": field_name in owned_relations,
+        "reverse": build_expected_reverse_from_table_name(
+            table_name=entity_cls_resolver.__tablename__,
+        )
+    }
+
+
+def build_expected_one_to_many_relation_args(
+        field_name: str,
+        typing_args: Tuple,
+        owned_relations: List[str],
+        entity_cls_resolver: EntityClassResolver,
+) -> dict:
+    return {
+        "relation_type": "one_to_many",
+        "key": build_expected_foreign_key_name(
+            relation_name=field_name,
+            relation_type="one_to_many"
+        ),
+        "entity_cls_resolver": typing_args[0],
+        "is_owner": field_name in owned_relations,
+        "reverse": build_expected_reverse_from_table_name(
+            table_name=entity_cls_resolver.__tablename__,
+        ),
+    }
 
 
 def build_expected_reverse_from_table_name(table_name: str) -> str:
@@ -155,38 +182,33 @@ def build_expected_entity_cls_fields(
         expected = {"name": field_name, "type": field_conf, "default": MISSING, "default_factory": MISSING}
         origin_type = get_origin(field_conf)
         if is_type_and_field_tuple(field_conf):
+            expected["type"] = field_conf[0]
             if not is_relation_field_conf(field_conf):
                 field = field_conf[1]
-                expected["type"] = field_conf[0]
                 expected["default"] = field.default if field.default is not UNDEFINED else MISSING
                 expected["default_factory"] = field.default_factory \
                     if field.default_factory is not UNDEFINED else MISSING
             else:
-                expected["type"] = field_conf[0]
-                is_owner = entity_cls_resolver.__conf__.relations[field_name].is_owner
-                expected["default"] = None
-                expected_foreign_key = build_expected_foreign_key_field(
-                    relation_name=field_name,
-                    is_owner=is_owner,
-                    relation_type="one_to_one",
-                )
-                if isinstance(field_conf[1], Relation):
-                    if get_origin(field_conf[0]) == list:
-                        expected["type"] = field_conf[0]
-                        expected["default"] = MISSING
-                        expected["default_factory"] = empty_list_factory
-                        expected_foreign_key = build_expected_foreign_key_field(
-                            relation_name=field_name,
-                            relation_type="one_to_many",
-                            is_owner=True,
-                        )
-                        expected_fields.append(expected_foreign_key)
-                    else:
-                        expected["default"] = None
-                        expected_foreign_key["default"] = None if field_conf[1].is_nullable and is_owner else MISSING
-                        expected_fields.append(expected_foreign_key)
+                if get_origin(field_conf[0]) == list:
+                    expected["default"] = MISSING
+                    expected["default_factory"] = empty_list_factory
+                    expected_foreign_key = build_expected_foreign_key_field(
+                        relation_name=field_name,
+                        relation_type="one_to_many",
+                        is_owner=True,
+                    )
+                    expected_fields.append(expected_foreign_key)
+                else:
+                    expected["default"] = None
+                    is_owner = entity_cls_resolver.__conf__.relations[field_name].is_owner
+                    expected_foreign_key = build_expected_foreign_key_field(
+                        relation_name=field_name,
+                        is_owner=is_owner,
+                        relation_type="one_to_one",
+                    )
+                    expected_foreign_key["default"] = None if field_conf[1].is_nullable and is_owner else MISSING
+                    expected_fields.append(expected_foreign_key)
         elif origin_type == list:
-            expected["type"] = field_conf
             expected["default_factory"] = empty_list_factory
             expected_foreign_key = build_expected_foreign_key_field(
                 relation_name=field_name,

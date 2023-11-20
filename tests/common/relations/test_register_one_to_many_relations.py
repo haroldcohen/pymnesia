@@ -66,7 +66,7 @@ def test_register_entity_with_a_one_to_many_relation_should_update_the_registry_
         in_memory_order_fields_conf = {"id": UUID, "order_lines": List[entity_class]}
 
     # noinspection PyTypeChecker
-    fields_conf["order"] = (Order, Relation(reverse="order_lines", is_owner=False))
+    fields_conf["order"] = (Order, Relation(reverse="order_lines", is_owner=False, relation_type="many_to_one"))
 
     # noinspection PyTypeChecker
     validate_entity_cls(

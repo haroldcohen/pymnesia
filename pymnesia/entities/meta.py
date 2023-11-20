@@ -1,7 +1,7 @@
 """Provides with a metaclass for entities.
 """
 from dataclasses import make_dataclass, field, fields as dataclass_fields, MISSING, Field as DataclassField
-from typing import List, Type, Tuple, Dict, Union, get_origin, get_args
+from typing import List, Type, Tuple, Dict, Union, get_origin, get_args, Any
 from uuid import UUID
 
 from pymnesia.entities.entity_cls_conf import EntityClsConf
@@ -26,6 +26,7 @@ class EntityMeta(type):
         relation_fields = {}
         relations = {}
         tablename = attrs["__tablename__"]
+        conf = EntityClsConf()
 
         for field_name, field_type in attrs["__annotations__"].items():
             if field_name in attrs.keys():
@@ -39,13 +40,12 @@ class EntityMeta(type):
                         )
                     ))
                 if isinstance(field_as_attr, Relation):
-                    field_as_attr.relation_type = "one_to_one"
-                    origin_type = get_origin(field_type)
-                    if origin_type == list:
-                        typing_args = get_args(field_type)
-                        field_type = typing_args[0]
+                    one_to_many_relation = _which_one_to_many_relation(typed_attr=field_type)
+                    relation = field_type
+                    if one_to_many_relation:
+                        relation = one_to_many_relation
                         field_as_attr.relation_type = "one_to_many"
-                    relations[field_type] = field_as_attr
+                    relations[relation] = field_as_attr
                     field_as_attr.is_owner = True
                     _add_foreign_key_to_fields(
                         relation_name=field_name,
@@ -53,18 +53,16 @@ class EntityMeta(type):
                         is_nullable=field_as_attr.is_nullable,
                         relation_type=field_as_attr.relation_type,
                     )
-                    relation_fields[field_type] = field_name
+                    relation_fields[relation] = field_name
             else:
-                origin_type = get_origin(field_type)
-                if origin_type == list:
-                    typing_args = get_args(field_type)
-                    relation = typing_args[0]
-                    relations[relation] = Relation(
+                one_to_many_relation = _which_one_to_many_relation(typed_attr=field_type)
+                if one_to_many_relation:
+                    relations[one_to_many_relation] = Relation(
                         reverse=tablename[0:-1],
                         relation_type="one_to_many",
                         is_owner=True,
                     )
-                    relation_fields[relation] = field_name
+                    relation_fields[one_to_many_relation] = field_name
                     _add_foreign_key_to_fields(
                         relation_name=field_name,
                         fields=fields,
@@ -91,6 +89,7 @@ class EntityMeta(type):
                 name=name,
                 tablename=tablename,
                 fields=fields,
+                conf=conf,
             )
         )
         if relations:
@@ -104,7 +103,11 @@ class EntityMeta(type):
         return cls_resolver
 
 
-def empty_list_factory():
+def empty_list_factory() -> List:
+    """Used as an alternative for lambda: [], since lambdas are compared by reference and hence cannot be tested.
+
+    :return: A empty list.
+    """
     return []
 
 
@@ -127,19 +130,22 @@ def _make_relations(
     tablename = cls_resolver.__tablename__
 
     for relation, relation_field in relations.items():
+        reverse_relation_type = "one_to_one"
+        if relation_field.relation_type == "one_to_many":
+            reverse_relation_type = "many_to_one"
         relation_current_fields = _extract_entity_cls_fields(relation)
         _add_foreign_key_to_fields(
             relation_name=relation_field.reverse,
             fields=relation_current_fields,
             is_nullable=False,
-            relation_type="one_to_one",
+            relation_type=reverse_relation_type,
         )
         _add_relation_to_fields(
             relation_name=relation_field.reverse,
             relation=cls_resolver,
             fields=relation_current_fields,
             is_nullable=True,
-            relation_type="one_to_one",
+            relation_type=reverse_relation_type,
         )
         relation_new_cls = _make_entity_dataclass(
             name=relation.__name__,
@@ -148,9 +154,9 @@ def _make_relations(
                 relation_current_fields,
                 key=lambda e: e[2].default == MISSING and e[2].default == MISSING,
                 reverse=True,
-            )
+            ),
+            conf=relation.__conf__,
         )
-        relation_new_cls.__conf__ = relation.__conf__
         relation.update_entity_cls(relation_new_cls)
         _add_relation_to_fields(
             relation_name=relation_fields[relation],
@@ -174,31 +180,38 @@ def _make_relations(
             relation=cls_resolver,
             relation_name=relation_field.reverse,
             relation_field=Relation(
-                reverse=reverse
+                reverse=reverse,
+                relation_type=reverse_relation_type,
             ),
-            relation_type="one_to_one",
+            relation_type=reverse_relation_type,
         )
 
     updated_entity_cls = _make_entity_dataclass(
         name=cls_resolver.__name__,
         tablename=tablename,
-        fields=cls_resolver_current_fields
+        fields=cls_resolver_current_fields,
+        conf=cls_resolver.__conf__,
     )
-    updated_entity_cls.__conf__ = cls_resolver.__conf__
     cls_resolver.update_entity_cls(updated_entity_cls)
 
 
-def _make_entity_dataclass(name: str, tablename: str, fields: List[Tuple]) -> Type[Entity]:
+def _make_entity_dataclass(
+        name: str,
+        tablename: str,
+        fields: List[Tuple],
+        conf: EntityClsConf,
+) -> Type[Entity]:
     """Makes a dataclass from entity class parameters.
 
     :param name: The entity class name
     :param tablename: The table name under which the entity should be registered
     :param fields: The fields to create for the entity dataclass
+    :param conf:
     :return: A entity dataclass
     """
     entity_cls = make_dataclass(name, fields, bases=(Entity,))
     entity_cls.__tablename__ = tablename
-    entity_cls.__conf__ = EntityClsConf()
+    entity_cls.__conf__ = conf
 
     # noinspection PyTypeChecker
     return entity_cls
@@ -280,20 +293,16 @@ def _add_foreign_key_to_fields(
     foreign_key_type = UUID
     if relation_type == "one_to_many":
         foreign_key_type = List[foreign_key_type]
-    field_args = {}
-    default = None if is_nullable and relation_type == "one_to_one" else MISSING
-    default_factory = MISSING if relation_type == "one_to_one" else empty_list_factory
-    if default is not MISSING:
-        field_args["default"] = default
-    if default_factory is not MISSING:
-        field_args["default_factory"] = default_factory
     fields.append((
         _build_foreign_key_name(
             relation_name=relation_name,
             relation_type=relation_type
         ),
         foreign_key_type,
-        field(**field_args)  # pylint: disable=invalid-field-call
+        field(**_build_relation_dataclass_field_args(  # pylint: disable=invalid-field-call
+            is_nullable=is_nullable,
+            relation_type=relation_type,
+        ))
     ))
 
 
@@ -313,22 +322,53 @@ def _add_relation_to_fields(
     :param is_nullable:
     :param relation_type:
     """
-    default = None if is_nullable and relation_type == "one_to_one" else MISSING
-    default_factory = MISSING if relation_type == "one_to_one" else empty_list_factory
-    field_args = {}
-    if default is not MISSING:
-        field_args["default"] = default
-    if default_factory is not MISSING:
-        field_args["default_factory"] = default_factory
     if relation_type == "one_to_many":
         relation = List[relation]
     fields.append(
         (
             relation_name,
             relation,
-            field(**field_args)  # pylint: disable=invalid-field-call
+            field(**_build_relation_dataclass_field_args(  # pylint: disable=invalid-field-call
+                is_nullable=is_nullable,
+                relation_type=relation_type,
+            ))
         )
     )
+
+
+def _build_relation_dataclass_field_args(
+        is_nullable: bool,
+        relation_type: str,
+) -> dict:
+    """Builds the arguments for dataclass field of a relation.
+
+    :param is_nullable: Whether the relation is nullable or not.
+    :param relation_type: The type of the relation (one_to_one, one_to_many)
+    :return: A dictionary containing the arguments to be used.
+    """
+    field_args = {}
+
+    default = None if is_nullable and relation_type != "one_to_many" else MISSING
+    default_factory = MISSING if relation_type != "one_to_many" else empty_list_factory
+    if default is not MISSING:
+        field_args["default"] = default
+    if default_factory is not MISSING:
+        field_args["default_factory"] = default_factory
+
+    return field_args
+
+
+def _which_one_to_many_relation(typed_attr: Any) -> Union[EntityClassResolver, None]:
+    """Determines the entity class resolver from a typed 'one to many' relation.
+
+    :param typed_attr: The typed attribute to determine the entity class resolver from.
+    :return: A entity class resolver if the provided typed_attr is a list else None
+    """
+    if get_origin(typed_attr) == list:
+        typing_args = get_args(typed_attr)
+        return typing_args[0]
+
+    return None
 
 
 def _build_foreign_key_name(
