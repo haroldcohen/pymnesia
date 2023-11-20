@@ -15,16 +15,6 @@ from pymnesia.api.entities import relation
 from tests.common_utils.helpers.validate import validate_entity_cls
 
 
-@pytest.fixture()
-def reverse(request):
-    return request.param
-
-
-@pytest.fixture()
-def use_relation_api(request):
-    return request.param
-
-
 @pytest.mark.parametrize(
     "entity_class_name, table_name, fields_conf, instance_values, use_relation_api",
     [
