@@ -2,13 +2,28 @@
 """
 import pytest
 
-from tests.common_utils.helpers import extract_entity_class_fields, extract_expected_dataclass_fields
+from tests.common_utils.helpers.extract import (
+    extract_entity_class_fields,
+    extract_expected_dataclass_fields
+)
 from tests.common_utils.helpers.expected import build_expected_entity_cls_attributes
-from tests.common_utils.helpers.make import FieldsConf
+from tests.common_utils.helpers.types import FieldsConf
 
-__all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
-           "where_clause", "or_clauses", "expected_entity_attributes", "expected_dataclass_fields",
-           "extracted_entity_class_fields", "expected_entity_instance", "use_dedicated_properties"]
+__all__ = [
+    "expected_entity",
+    "expected_entities",
+    "limit",
+    "direction",
+    "order_by_key",
+    "use_properties",
+    "where_clause",
+    "or_clauses",
+    "expected_entity_attributes",
+    "expected_dataclass_fields",
+    "extracted_entity_class_fields",
+    "expected_entity_instance",
+    "use_dedicated_properties",
+]
 
 
 @pytest.fixture()

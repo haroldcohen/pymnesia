@@ -4,16 +4,16 @@ from dataclasses import Field
 from typing import Dict, List
 
 from hamcrest import assert_that, equal_to
+
 from pymnesia.entities.entity_cls_conf import EntityClsConf
+from pymnesia.entities.entity_resolver import EntityClassResolver
+from tests.common_utils.helpers.extract import extract_entity_class_fields
 
 __all__ = [
     "assert_that_entity_cls_conf_equal_to_expected",
     "assert_that_entity_cls_attributes_equal_to_expected",
     "assert_that_entity_cls_fields_equal_to_expected",
 ]
-
-from pymnesia.entities.entity_resolver import EntityClassResolver
-from tests.common_utils.helpers import extract_entity_class_fields
 
 
 def assert_that_entity_cls_conf_equal_to_expected(

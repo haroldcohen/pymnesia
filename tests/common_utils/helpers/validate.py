@@ -3,11 +3,18 @@
 from typing import List
 
 from pymnesia.entities.entity_resolver import EntityClassResolver
-from tests.common_utils.helpers.assert_that import assert_that_entity_cls_conf_equal_to_expected, \
-    assert_that_entity_cls_attributes_equal_to_expected, assert_that_entity_cls_fields_equal_to_expected
-from tests.common_utils.helpers.expected import build_expected_entity_cls_conf, build_expected_entity_cls_attributes, \
-    build_expected_entity_cls_attributes_with_relations, build_expected_entity_cls_fields
-from tests.common_utils.helpers.make import FieldsConf
+from tests.common_utils.helpers.assert_that import (
+    assert_that_entity_cls_conf_equal_to_expected,
+    assert_that_entity_cls_attributes_equal_to_expected,
+    assert_that_entity_cls_fields_equal_to_expected,
+)
+from tests.common_utils.helpers.expected import (
+    build_expected_entity_cls_conf,
+    build_expected_entity_cls_attributes,
+    build_expected_entity_cls_attributes_with_relations,
+    build_expected_entity_cls_fields
+)
+from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = [
     "validate_entity_cls",

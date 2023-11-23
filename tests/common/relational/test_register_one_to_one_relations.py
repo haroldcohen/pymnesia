@@ -2,16 +2,18 @@
 """
 from uuid import UUID, uuid4
 
-from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.registry import *
 from tests.common_utils.helpers.make import make_entity_class
 from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
 from pymnesia.api.entities import relation
+from tests.common_utils.helpers.relations.misc import generate_rel_entity_cls_params
+from tests.common_utils.helpers.relations.types import RelatedEntityClsParams
 from tests.common_utils.helpers.validate import validate_entity_cls
 
 
@@ -150,75 +152,51 @@ def test_register_orders_with_a_one_to_one_non_nullable_relation_should_update_t
     registry.unregister(InMemoryOrder)
 
 
-def test_register_entity_with_one_to_one_relations_should_update_the_registry_with_matching_relations():
-    """Tests whether multiple 'one to one' relationships can be declared.
-    """
+@pytest.mark.parametrize(
+    "entity_class_name, table_name, fields_conf, related_entity_classes_params",
+    [
+        (
+                "InMemoryOrder", "orders",
+                {"id": UUID},
+                [
+                    generate_rel_entity_cls_params(
+                        class_name="InMemoryOrderCustomization",
+                        fields_conf={"id": UUID},
+                    ),
+                    generate_rel_entity_cls_params(
+                        class_name="InMemoryPackagingOption",
+                        fields_conf={"id": UUID},
+                    )
+                ],
+        )
+    ],
+    indirect=True,
+)
+def test_register_entity_with_one_to_one_relations_should_update_the_registry_with_matching_relations(
+        entity_class_name,
+        table_name,
+        fields_conf,
+        entity_class,
+        related_entity_classes_params,
+        related_entity_classes,
+        unit_of_work,
+        unregister_entity_classes,
+):
     # Arrange
-    related_entities_cls_info = {
-        "InMemoryOrderCustomization": {
-            "table_name": "customizations",
-            "single_form": "customization",
-            "fields_conf": {"id": UUID},
-            "cls_resolver": None,
-        },
-        "InMemoryPackagingOption": {
-            "table_name": "packaging_options",
-            "single_form": "packaging_option",
-            "fields_conf": {"id": UUID},
-            "cls_resolver": None,
-        },
-    }
-    order_customization_class = make_entity_class(
-        name="InMemoryOrderCustomization",
-        table_name="customizations",
-        fields_conf=related_entities_cls_info["InMemoryOrderCustomization"]["fields_conf"],
-    )
-    related_entities_cls_info["InMemoryOrderCustomization"]["cls_resolver"] = order_customization_class
-    order_packaging_option_class = make_entity_class(
-        name="InMemoryPackagingOption",
-        table_name="packaging_options",
-        fields_conf=related_entities_cls_info["InMemoryPackagingOption"]["fields_conf"]
-    )
-    related_entities_cls_info["InMemoryPackagingOption"]["cls_resolver"] = order_packaging_option_class
-    in_memory_order_line_fields_conf = {"id": UUID}
-
-    for rel_entity_cls_name, rel_entity_cls_info in related_entities_cls_info.items():
-        entity_cls_resolver = rel_entity_cls_info["cls_resolver"]
-        in_memory_order_line_fields_conf[rel_entity_cls_info["single_form"]] = (
-            entity_cls_resolver,
-            relation(reverse="order_line")
-        )
-
-    # Act
-    in_memory_order_line_class = make_entity_class(
-        name="InMemoryOrderLine",
-        table_name="order_lines",
-        fields_conf=in_memory_order_line_fields_conf,
-    )
-
+    owned_relations = [related_entity_class_params.single_form for related_entity_class_params in
+                       related_entity_classes_params]
     # Assert
-    for rel_entity_cls_name, rel_entity_cls_info in related_entities_cls_info.items():
-        entity_cls_resolver = rel_entity_cls_info["cls_resolver"]
-        rel_entity_fields_conf = rel_entity_cls_info["fields_conf"]
-        in_memory_order_line_fields_conf[rel_entity_cls_info["single_form"]] = (
-            entity_cls_resolver,
-            relation(reverse="order_line")
-        )
-        rel_entity_cls_info["fields_conf"]["order_line"] = (
-            in_memory_order_line_class,
-            Relation(reverse=rel_entity_cls_info["single_form"], is_owner=False)
-        )
-        validate_entity_cls(
-            entity_cls_resolver=entity_cls_resolver,
-            fields_conf=rel_entity_fields_conf,
-            owned_relations=[],
-        )
     validate_entity_cls(
-        entity_cls_resolver=in_memory_order_line_class,
-        fields_conf=in_memory_order_line_fields_conf,
-        owned_relations=["customization", "packaging_option"],
+        entity_cls_resolver=entity_class,
+        fields_conf=fields_conf,
+        owned_relations=owned_relations,
     )
-    # Cleanup
-    registry.unregister(in_memory_order_line_class)
-    for rel_entity_cls_name, rel_entity_cls_info in related_entities_cls_info.items():
-        registry.unregister(rel_entity_cls_info["cls_resolver"])
+    for rel_entity_cls_params in related_entity_classes_params:
+        validate_entity_cls(
+            entity_cls_resolver=rel_entity_cls_params.cls_resolver,
+            fields_conf=rel_entity_cls_params.fields_conf,
+            owned_relations=[]
+        )
+
+
+

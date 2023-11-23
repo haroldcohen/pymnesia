@@ -10,7 +10,8 @@ from pymnesia.entities.entity_resolver import EntityClassResolver
 from pymnesia.entities.field import UNDEFINED
 from pymnesia.entities.meta import empty_list_factory
 from pymnesia.entities.relations import Relation
-from tests.common_utils.helpers.make import FieldsConf, is_relation_field_conf, is_type_and_field_tuple
+from tests.common_utils.helpers.make import is_relation_field_conf, is_type_and_field_tuple
+from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = [
     "build_expected_entity_cls_conf",
