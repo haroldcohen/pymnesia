@@ -1,85 +1,65 @@
 """Provides with unit tests to validate 'one to one' relationships feature.
 """
-from typing import List
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from tests.common_utils.fixtures.registry import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
-from tests.common_utils.fixtures.registry import *
-from pymnesia.entities.base import DeclarativeBase
-from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
-from pymnesia.api.entities import relation
+from tests.common_utils.helpers.misc import generate_entity_cls_params
+from tests.common_utils.helpers.relations.misc import generate_rel_entity_cls_params
 from tests.common_utils.helpers.validate import validate_entity_cls
 
 
 @pytest.mark.parametrize(
-    "entity_class_name, table_name, fields_conf, instance_values, use_relation_api",
+    "entity_cls_params",
     [
-        ("OrderLine", "order_lines", {
-            "id": UUID,
-        }, {"id": uuid4()}, False),
-        ("OrderLine", "order_lines", {
-            "id": UUID,
-        }, {"id": uuid4()}, True),
+        generate_entity_cls_params(
+            class_name="Order",
+            fields_conf={"id": UUID},
+            rel_entity_classes_params=[
+                generate_rel_entity_cls_params(
+                    class_name="OrderLine",
+                    fields_conf={"id": UUID},
+                    relation_type="many_to_one",
+                )
+            ]
+        ),
+        # Using relation api
+        generate_entity_cls_params(
+            class_name="Invoice",
+            fields_conf={"id": UUID},
+            rel_entity_classes_params=[
+                generate_rel_entity_cls_params(
+                    class_name="InvoiceLine",
+                    fields_conf={"id": UUID},
+                    relation_type="many_to_one",
+                    owner_rel_api=Relation(reverse="invoice_"),
+                )
+            ]
+        ),
     ],
     indirect=True,
 )
-def test_register_entity_with_a_one_to_many_relation_should_update_the_registry_with_a_matching_relation(
-        entity_class_name,
-        table_name,
+def test_declarative_register_entity_with_a_one_to_many_relation_should_update_the_registry_with_a_matching_relation(
+        entity_cls_params,
         fields_conf,
-        entity_class,
-        instance_values,
-        expected_entity_attributes,
-        unit_of_work,
-        unregister_entity_class,
-        use_relation_api,
+        entity_cls,
+        rel_entity_classes,
+        unregister_entity_classes,
+        owned_relations,
 ):
-    relation_field = None
-    if use_relation_api:
-        relation_field = relation(reverse="order")
-
-    class Order(DeclarativeBase):
-        __tablename__ = "orders"
-
-        id: UUID
-
-        if use_relation_api:
-            order_lines: List[entity_class] = relation_field
-        else:
-            order_lines: List[entity_class]
-
-    if use_relation_api:
-        relation_field.relation_type = "one_to_many"
-        # noinspection PyTypeChecker
-        in_memory_order_fields_conf = {
-            "id": UUID,
-            "order_lines": (
-                List[entity_class],
-                relation_field
-            )
-        }
-    else:
-        in_memory_order_fields_conf = {"id": UUID, "order_lines": List[entity_class]}
-
-    # noinspection PyTypeChecker
-    fields_conf["order"] = (Order, Relation(reverse="order_lines", is_owner=False, relation_type="many_to_one"))
-
-    # noinspection PyTypeChecker
+    related_entity_class_params = entity_cls_params.rel_entity_classes_params[0]
+    # Assert
     validate_entity_cls(
-        entity_cls_resolver=Order,
-        fields_conf=in_memory_order_fields_conf,
-        owned_relations=["order_lines"],
+        entity_cls_resolver=entity_cls,
+        fields_conf=entity_cls_params.fields_conf,
+        owned_relations=[related_entity_class_params.table_name],
     )
-    # noinspection PyTypeChecker
     validate_entity_cls(
-        entity_cls_resolver=entity_class,
-        fields_conf=fields_conf,
+        entity_cls_resolver=related_entity_class_params.cls_resolver,
+        fields_conf=related_entity_class_params.fields_conf,
         owned_relations=[],
     )
-
-    # Cleanup
-    registry.unregister(Order)

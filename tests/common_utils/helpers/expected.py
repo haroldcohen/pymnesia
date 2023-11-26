@@ -133,7 +133,8 @@ def build_expected_entity_cls_attributes(fields_conf: FieldsConf) -> Dict:
     expected_attrs = {}
     for field_name, field_conf in fields_conf.items():
         if is_type_and_field_tuple(field_conf):
-            expected_attrs[field_name] = field_conf[0]
+            if not is_relation_field_conf(field_conf):
+                expected_attrs[field_name] = field_conf[0]
         else:
             expected_attrs[field_name] = field_conf
 

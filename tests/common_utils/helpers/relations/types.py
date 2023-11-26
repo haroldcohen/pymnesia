@@ -4,6 +4,7 @@ from typing import Optional, List
 from dataclasses import dataclass
 
 from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.entities.relations import Relation
 from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = ["RelatedEntityClassesParams", "RelatedEntityClsParams"]
@@ -22,6 +23,10 @@ class RelatedEntityClsParams:
     fields_conf: FieldsConf
 
     cls_resolver: Optional[EntityClassResolver]
+
+    relation_type: str
+
+    owner_rel_api: Optional[Relation]
 
 
 RelatedEntityClassesParams = List[RelatedEntityClsParams]
