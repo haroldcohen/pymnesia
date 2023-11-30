@@ -105,6 +105,7 @@ def or_clauses(request):
         return request.param
     return []
 
+
 @pytest.fixture()
 def use_dedicated_properties(request):
     if hasattr(request, "param"):

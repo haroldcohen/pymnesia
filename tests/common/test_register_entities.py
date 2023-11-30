@@ -9,8 +9,8 @@ from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.registry import *
+from pymnesia.entities.registry import registry
 from pymnesia.entities.field import Field
-from pymnesia.entities.entity import Entity
 from tests.common_utils.helpers.misc import generate_entity_cls_params
 from tests.common_utils.helpers.validate import validate_entity_cls
 
@@ -49,16 +49,13 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
     # WARNING !!!
     # Need to check: instance from expected instance, dataclass
     # Assert
-    assert_that(
-        issubclass(entity_cls, Entity),
-        equal_to(True)
-    )
-    assert_that(
-        getattr(unit_of_work, entity_cls_params.table_name),
-        equal_to({})
-    )
     validate_entity_cls(
         entity_cls_resolver=entity_cls,
         fields_conf=entity_cls_params.fields_conf,
         owned_relations=owned_relations,
+        registry=registry,
+    )
+    assert_that(
+        getattr(unit_of_work, entity_cls_params.table_name),
+        equal_to({})
     )
