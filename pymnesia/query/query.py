@@ -10,6 +10,9 @@ from pymnesia.query.runner import QueryRunner
 from pymnesia.query.filter.functions import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from pymnesia.query.filter.relations import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
+FIELD_OPERATOR_REGEX = re.compile(r'^(?P<field>\w+)::(?P<operator>\w+)$')
+RELATION_PROPERTY_REGEX = re.compile(r'^(?P<rel>\w+)\.(?P<rel_property>.*)$')
+
 
 class Query:
     """Allows to store a query parameters and run the query using a QueryRunner.
@@ -96,14 +99,14 @@ class Query:
         filter_funcs = []
         for condition, value in clause.items():
             filter_args = {"value": value}
-            matched_condition = re.match(r'^(?P<field>\w+)::(?P<operator>\w+)$', condition)
+            matched_condition = re.match(FIELD_OPERATOR_REGEX, condition)
             if matched_condition:
                 filter_func = find_filter_function(filter_name=matched_condition.group("operator"))
                 filter_args["field"] = matched_condition.group("field")
             else:
                 filter_func = find_filter_function(filter_name="eq")
                 filter_args["field"] = condition
-                matched_rel_property = re.match(r'^(?P<rel>\w+)\.(?P<rel_property>.*)$', condition)
+                matched_rel_property = re.match(RELATION_PROPERTY_REGEX, condition)
                 if matched_rel_property:
                     filter_func = find_filter_function(filter_name="eq", relational=True)
                     filter_args["unit_of_work"] = self.__unit_of_work
