@@ -3,7 +3,7 @@
 import re
 
 from pymnesia.entities.relations import Relation
-from tests.common_utils.helpers.relations.types import RelatedEntityClsParams
+from tests.common_utils.helpers.entities.make.relations.types import RelatedEntityClsParams
 from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = ["generate_rel_entity_cls_params"]

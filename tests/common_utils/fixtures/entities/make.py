@@ -6,8 +6,8 @@ import pytest
 
 from pymnesia.api.entities import relation
 from pymnesia.entities.relations import Relation
-from tests.common_utils.helpers.make_types import EntityClsParams
-from tests.common_utils.helpers.make import make_entity_class
+from tests.common_utils.helpers.entities.make.types import EntityClsParams
+from tests.common_utils.helpers.entities.make.make import make_entity_class
 
 # pylint: disable=redefined-outer-name
 

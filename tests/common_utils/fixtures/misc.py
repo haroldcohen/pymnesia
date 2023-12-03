@@ -4,8 +4,6 @@ import time
 
 import pytest
 
-__all__ = ["mocked_time_ns", "time_ns"]
-
 
 @pytest.fixture()
 def time_ns() -> int:
@@ -14,7 +12,7 @@ def time_ns() -> int:
 
 
 @pytest.fixture()
-def mocked_time_ns(time_ns: int, mocker):
+def mocked_time_ns(time_ns: int, mocker):  # pylint: disable=redefined-outer-name
     """Mocks the time.time_ns() function to return the current timestamp + 1"""
 
     def time_ns_mocker() -> int:

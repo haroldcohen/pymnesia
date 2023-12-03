@@ -1,6 +1,6 @@
 """Provides with unit tests to validate 'one to one' relationships feature.
 """
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from hamcrest import assert_that, equal_to
 
@@ -11,8 +11,8 @@ from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.registry import *
 from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
-from tests.common_utils.helpers.misc import generate_entity_cls_params
-from tests.common_utils.helpers.relations.misc import generate_rel_entity_cls_params
+from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
+from tests.common_utils.helpers.entities.make.relations.generate import generate_rel_entity_cls_params
 from tests.common_utils.helpers.validate import validate_entity_cls
 
 

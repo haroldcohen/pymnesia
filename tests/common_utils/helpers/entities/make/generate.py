@@ -2,8 +2,8 @@
 """
 import re
 
-from tests.common_utils.helpers.make_types import EntityClsParams
-from tests.common_utils.helpers.relations.types import RelatedEntityClassesParams
+from tests.common_utils.helpers.entities.make.types import EntityClsParams
+from tests.common_utils.helpers.entities.make.relations.types import RelatedEntityClassesParams
 from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = ["generate_entity_cls_params"]
