@@ -1,19 +1,20 @@
 """Provides with dynamically constructed entity classes.
 """
 from dataclasses import MISSING
-from typing import Any, Dict, Union, Tuple, get_origin, get_args
+from typing import Any, get_origin, get_args
 
 from pymnesia.entities.entity import Entity
 from pymnesia.entities.field import Field, UNDEFINED
 from pymnesia.entities.relations import Relation
 from pymnesia.entities.base import DeclarativeBase
 from pymnesia.entities.meta import EntityMeta
+from tests.common_utils.helpers.types import FieldsConf
 
-__all__ = ["FieldConf", "FieldsConf", "make_entity_class", "is_type_and_field_tuple", "is_relation_field_conf"]
-
-FieldConf = Union[type, Tuple[type, Union[Field, Relation]]]
-
-FieldsConf = Dict[str, FieldConf]
+__all__ = [
+    "make_entity_class",
+    "is_type_and_field_tuple",
+    "is_relation_field_conf",
+]
 
 
 class GenericEntityMeta(type):
@@ -87,13 +88,10 @@ def is_relation_field_conf(field_conf: Any) -> bool:
     :param field_conf: The field conf to evaluate.
     :return: bool
     """
-    is_type_field_tuple = is_type_and_field_tuple(field_conf)
-    if is_type_field_tuple:
-        field_conf_type = field_conf[0]
-        origin_type = get_origin(field_conf_type)
-        if origin_type == list:
-            typing_args = get_args(field_conf_type)
-            field_conf_type = typing_args[0]
-        return issubclass(field_conf_type, Entity)
+    field_conf_type = field_conf[0]
+    origin_type = get_origin(field_conf_type)
+    if origin_type == list:
+        typing_args = get_args(field_conf_type)
+        field_conf_type = typing_args[0]
 
-    return issubclass(field_conf[0], Entity)
+    return issubclass(field_conf_type, Entity)

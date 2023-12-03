@@ -2,13 +2,17 @@
 """
 import pytest
 
-from tests.common_utils.helpers import extract_entity_class_fields, extract_expected_dataclass_fields
-from tests.common_utils.helpers.expected import build_expected_entity_cls_attributes
-from tests.common_utils.helpers.make import FieldsConf
-
-__all__ = ["expected_entity", "expected_entities", "limit", "direction", "order_by_key", "use_properties",
-           "where_clause", "or_clauses", "expected_entity_attributes", "expected_dataclass_fields",
-           "extracted_entity_class_fields", "expected_entity_instance", "use_dedicated_properties"]
+__all__ = [
+    "expected_entity",
+    "expected_entities",
+    "limit",
+    "direction",
+    "order_by_key",
+    "use_properties",
+    "where_clause",
+    "or_clauses",
+    "use_dedicated_properties",
+]
 
 
 @pytest.fixture()
@@ -100,32 +104,6 @@ def or_clauses(request):
     if hasattr(request, "param"):
         return request.param
     return []
-
-
-@pytest.fixture()
-def expected_entity_attributes(fields_conf):
-    return build_expected_entity_cls_attributes(fields_conf=fields_conf)
-
-
-@pytest.fixture()
-def expected_dataclass_fields(fields_conf: FieldsConf):
-    return extract_expected_dataclass_fields(fields_conf=fields_conf)
-
-
-@pytest.fixture()
-def extracted_entity_class_fields(entity_class):
-    return extract_entity_class_fields(entity_class)
-
-
-@pytest.fixture()
-def expected_entity_instance(entity_class, instance_values):
-    """Returns an expected instance of an entity class based on provided values.
-
-    :param entity_class: The entity class to instantiate.
-    :param instance_values: The values to use.
-    :return: A instance of the provided entity class.
-    """
-    return entity_class(**instance_values)
 
 
 @pytest.fixture()

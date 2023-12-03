@@ -3,11 +3,19 @@
 from typing import List
 
 from pymnesia.entities.entity_resolver import EntityClassResolver
-from tests.common_utils.helpers.assert_that import assert_that_entity_cls_conf_equal_to_expected, \
-    assert_that_entity_cls_attributes_equal_to_expected, assert_that_entity_cls_fields_equal_to_expected
-from tests.common_utils.helpers.expected import build_expected_entity_cls_conf, build_expected_entity_cls_attributes, \
-    build_expected_entity_cls_attributes_with_relations, build_expected_entity_cls_fields
-from tests.common_utils.helpers.make import FieldsConf
+from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
+from tests.common_utils.helpers.assert_that import (
+    assert_that_entity_cls_conf_equal_to_expected,
+    assert_that_entity_cls_attributes_equal_to_expected,
+    assert_that_entity_cls_fields_equal_to_expected, assert_that_entity_cls_is_registered,
+)
+from tests.common_utils.helpers.expected import (
+    build_expected_entity_cls_conf,
+    build_expected_entity_cls_attributes,
+    build_expected_entity_cls_attributes_with_relations,
+    build_expected_entity_cls_fields
+)
+from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = [
     "validate_entity_cls",
@@ -21,12 +29,14 @@ def validate_entity_cls(
         entity_cls_resolver: EntityClassResolver,
         fields_conf: FieldsConf,
         owned_relations: List[str],
+        registry: PymnesiaRegistryInterface,
 ):
     """Validates an entity class.
 
     :param entity_cls_resolver:
     :param fields_conf:
     :param owned_relations:
+    :param registry:
     :return: None
     """
     validate_entity_cls_attributes(
@@ -41,6 +51,10 @@ def validate_entity_cls(
         entity_cls_resolver=entity_cls_resolver,
         fields_conf=fields_conf,
         owned_relations=owned_relations,
+    )
+    validate_entity_cls_registry(
+        entity_cls_resolver=entity_cls_resolver,
+        registry=registry,
     )
 
 
@@ -109,4 +123,20 @@ def validate_entity_cls_fields(
     assert_that_entity_cls_fields_equal_to_expected(
         actual_entity_cls=entity_cls_resolver,
         expected_fields=expected_entity_cls_fields,
+    )
+
+
+def validate_entity_cls_registry(
+        entity_cls_resolver: EntityClassResolver,
+        registry: PymnesiaRegistryInterface,
+):
+    """Validates registry related features for an entity class.
+
+    :param entity_cls_resolver:
+    :param registry:
+    :return: None
+    """
+    assert_that_entity_cls_is_registered(
+        actual_entity_cls=entity_cls_resolver,
+        registry=registry,
     )
