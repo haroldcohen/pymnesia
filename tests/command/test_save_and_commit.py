@@ -7,10 +7,8 @@ from hamcrest import assert_that, equal_to
 
 from tests.common_utils.entities.order import InMemoryOrder
 from tests.common_utils.entities.product import InMemoryProduct
-from tests.common_utils.entities.invoice import InMemoryInvoice
-from tests.common_utils.entities.product_spec import InMemoryProductSpec
-from pymnesia.unit_of_work.unit_of_work import UnitOfWork
 from pymnesia.transaction.transaction import InMemoryTransaction
+from pymnesia.unit_of_work.unit_of_work import UnitOfWork
 from tests.common_utils.fixtures.unit_of_work.expected import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.misc import *
@@ -30,8 +28,8 @@ def test_save_an_entity_and_commit_should_update_unit_of_work_with_an_entity(
         time_ns,
         unit_of_work,
         mocked_time_ns,
-        expected_unit_of_work_memento,
         expected_entity,
+        expected_unit_of_work_memento,
 ):
     """Tests whether saving and committing an entity updates the unit of work."""
     # Arrange
@@ -89,4 +87,3 @@ def test_save_multiple_entities_and_commit_should_update_unit_of_work_with_multi
             retrieved_entity,
             equal_to(expected_entity)
         )
-

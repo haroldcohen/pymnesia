@@ -114,7 +114,6 @@ def test_query_and_fetch_with_a_where_or_clause_and_order_by_should_return_a_num
 def test_query_and_fetch_one_with_a_where_or_clause_should_return_one_filtered_entity(
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         entities,
         where_clause,
         or_clauses,
