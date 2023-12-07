@@ -17,21 +17,26 @@ from tests.common_utils.fixtures.misc import *
 
 
 @pytest.mark.parametrize(
-    "expected_entities, use_dedicated_properties",
+    "expected_entities",
     [
         ([
-             InMemoryOrder(id=UUID("4e5c4d8e-6f2a-4cb9-bd9f-56631f544967")),
-         ],
-         [
-             {"invoice_id": uuid4(), "proforma_id": uuid4()},
+             InMemoryOrder(
+                 id=uuid4(),
+                 invoice_id=uuid4(),
+                 proforma_id=uuid4(),
+             ),
          ]),
         ([
-             InMemoryOrder(id=uuid4()),
-             InMemoryOrder(id=uuid4()),
-         ],
-         [
-             {"invoice_id": uuid4(), "proforma_id": uuid4()},
-             {"invoice_id": uuid4(), "proforma_id": uuid4()},
+             InMemoryOrder(
+                 id=uuid4(),
+                 invoice_id=uuid4(),
+                 proforma_id=uuid4(),
+             ),
+             InMemoryOrder(
+                 id=uuid4(),
+                 invoice_id=uuid4(),
+                 proforma_id=uuid4(),
+             ),
          ]),
     ],
     indirect=True,
@@ -39,19 +44,17 @@ from tests.common_utils.fixtures.misc import *
 def test_query_orders_should_return_all_orders_with_a_loaded_invoice(
         unit_of_work,
         transaction,
-        use_dedicated_properties,
         expected_entities,
         populate_entities,
 ):
-    properties_idx = 0
     for entity in expected_entities:
         invoice = InMemoryInvoice(
-            id=use_dedicated_properties[properties_idx]["invoice_id"],
+            id=entity.invoice_id,
             order_id=entity.id
         )
         proforma = InMemoryProforma(
-            id=use_dedicated_properties[properties_idx]["proforma_id"],
-            invoice_id=use_dedicated_properties[properties_idx]["invoice_id"],
+            id=entity.proforma_id,
+            invoice_id=entity.invoice_id,
             order_id=entity.id
         )
         unit_of_work.save_entity(entity=invoice)
@@ -59,8 +62,7 @@ def test_query_orders_should_return_all_orders_with_a_loaded_invoice(
         transaction.commit()
         entity.invoice = invoice
         entity.proforma = proforma
-        properties_idx += 1
-    # # Act
+    # Act
     result = getattr(unit_of_work.query(), expected_entities[0].__tablename__)().fetch()
     # Assert
     assert_that(
