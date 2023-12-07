@@ -16,10 +16,11 @@ from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.entities.populate import *
 from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.query.expressions import where_clause
 
 
 @pytest.mark.parametrize(
-    "entities, expected_entity, where_clause, use_properties",
+    "entities, expected_entity, where_clause",
     [
         ([
              InMemoryOrder(
@@ -31,9 +32,11 @@ from tests.common_utils.fixtures.misc import *
                 order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
              ),
          ],
-         InMemoryOrder(id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26")),
-         {"invoice.id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")},
-         {"invoice_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
+         InMemoryOrder(
+             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
+             invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")
+         ),
+         {"invoice.id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
         ([
              InMemoryOrder(
                  id=UUID("4e5c4d8e-6f2a-4cb9-bd9f-56631f544967"),
@@ -45,9 +48,11 @@ from tests.common_utils.fixtures.misc import *
                  total_with_vat=20,
              ),
          ],
-         InMemoryOrder(id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26")),
-         {"invoice.total_with_vat": 20},
-         {"invoice_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
+         InMemoryOrder(
+             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
+             invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
+         ),
+         {"invoice.total_with_vat": 20}),
         ([
              InMemoryOrder(id=uuid4()),
              InMemoryProforma(
@@ -74,21 +79,20 @@ from tests.common_utils.fixtures.misc import *
                  number="2023-00001",
              ),
          ],
-         InMemoryOrder(id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26")),
-         {"invoice.proforma.total_with_vat::gt": 30, "invoice.number::match": r'^2023-.*$'},
-         {"invoice_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
+         InMemoryOrder(
+             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
+             invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
+         ),
+         {"invoice.proforma.total_with_vat::gt": 30, "invoice.number::match": r'^2023-.*$'}),
     ],
     indirect=True,
 )
 def test_query_orders_with_a_where_clause_should_return_the_first_order_with_a_loaded_invoice(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
         entities,
         where_clause,
         use_properties,
-        expected_unit_of_work_memento,
         expected_entity,
         populate_entities,
 ):
@@ -104,7 +108,7 @@ def test_query_orders_with_a_where_clause_should_return_the_first_order_with_a_l
 
 
 @pytest.mark.parametrize(
-    "entities, expected_entity, where_clause, use_properties",
+    "entities, expected_entity, where_clause",
     [
         ([
              InMemoryProduct(
@@ -116,21 +120,20 @@ def test_query_orders_with_a_where_clause_should_return_the_first_order_with_a_l
                 product_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
              ),
          ],
-         InMemoryProduct(id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26")),
-         {"spec_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")},
+         InMemoryProduct(
+             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
+             spec_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
+         ),
          {"spec_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
     ],
     indirect=True,
 )
 def test_query_products_with_a_where_clause_should_return_the_first_product_with_a_loaded_spec(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
         entities,
         where_clause,
         use_properties,
-        expected_unit_of_work_memento,
         expected_entity,
         populate_entities,
 ):

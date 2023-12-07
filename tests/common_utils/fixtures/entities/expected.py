@@ -5,12 +5,7 @@ import pytest
 __all__ = [
     "expected_entity",
     "expected_entities",
-    "limit",
-    "direction",
-    "order_by_key",
     "use_properties",
-    "where_clause",
-    "or_clauses",
     "use_dedicated_properties",
 ]
 
@@ -62,48 +57,10 @@ def expected_entities(
 
 
 @pytest.fixture()
-def limit(request):
-    if hasattr(request, "param"):
-        return request.param
-    return 0
-
-
-@pytest.fixture()
-def order_by_key(request):
-    return request.param
-
-
-@pytest.fixture()
-def direction(request):
-    if hasattr(request, "param"):
-        return request.param
-    return "asc"
-
-
-@pytest.fixture()
-def use_properties(request, where_clause):  # pylint: disable=redefined-outer-name
-    if hasattr(request, "param"):
-        return request.param
-    if len(where_clause):
-        use_properties_ = {}
-        for condition, value in where_clause.items():
-            use_properties_[condition] = value
-        return use_properties_
-    return {}
-
-
-@pytest.fixture()
-def where_clause(request):
+def use_properties(request):  # pylint: disable=redefined-outer-name
     if hasattr(request, "param"):
         return request.param
     return {}
-
-
-@pytest.fixture()
-def or_clauses(request):
-    if hasattr(request, "param"):
-        return request.param
-    return []
 
 
 @pytest.fixture()

@@ -37,12 +37,9 @@ from tests.common_utils.fixtures.misc import *
     indirect=True,
 )
 def test_query_orders_should_return_all_orders_with_a_loaded_invoice(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
         use_dedicated_properties,
-        expected_unit_of_work_memento,
         expected_entities,
         populate_entities,
 ):

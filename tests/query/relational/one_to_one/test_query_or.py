@@ -13,10 +13,14 @@ from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.entities.populate import *
 from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.query.expressions import (
+    where_clause,
+    or_clauses,
+)
 
 
 @pytest.mark.parametrize(
-    "entities, where_clause, or_clauses, use_properties, expected_entities",
+    "entities, where_clause, or_clauses, expected_entities",
     [
         ([
              InMemoryOrder(
@@ -43,7 +47,6 @@ from tests.common_utils.fixtures.misc import *
          ],
          {"total_amount": 60},
          [{"invoice.number::match": r'^2022-.*$'}],
-         {},
          [
              InMemoryOrder(
                  id=UUID("99a8c211-c8a1-49dc-b3f3-d9999abd4212"),
@@ -72,15 +75,11 @@ from tests.common_utils.fixtures.misc import *
     indirect=True,
 )
 def test_query_and_fetch_with_a_where_or_clause_on_a_relation_should_return_a_number_of_filtered_entities(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         entities,
         where_clause,
         or_clauses,
-        use_properties,
         expected_entities,
         populate_entities,
 ):
