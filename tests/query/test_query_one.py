@@ -24,11 +24,8 @@ from tests.common_utils.fixtures.misc import *
     indirect=True,
 )
 def test_query_an_entity_table_should_return_the_first_entity(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         expected_entity,
         populate_entities,
 ):

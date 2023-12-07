@@ -24,11 +24,8 @@ from tests.common_utils.fixtures.misc import *
     indirect=True,
 )
 def test_query_an_entity_table_should_return_all_its_entities(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         expected_entities,
         populate_entities,
 ):

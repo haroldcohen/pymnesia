@@ -12,6 +12,10 @@ from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.entities.populate import *
 from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.query.expressions import (
+    direction,
+    order_by_key,
+)
 
 
 @pytest.mark.parametrize(
@@ -33,19 +37,16 @@ from tests.common_utils.fixtures.misc import *
     indirect=True,
 )
 def test_query_and_order_by_should_return_ordered_entities(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         expected_entities,
         populate_entities,
         direction,
         order_by_key,
 ):
     # Act
-    result = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()\
-        .order_by(direction, order_by_key)\
+    result = getattr(unit_of_work.query(), expected_entities[0].__tablename__)() \
+        .order_by(direction, order_by_key) \
         .fetch()
     sorted_entities = sorted(expected_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
     # Assert

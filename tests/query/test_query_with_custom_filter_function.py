@@ -18,23 +18,18 @@ from tests.common_utils.fixtures.misc import *
 
 
 @pytest.mark.parametrize(
-    "entities, where_clause, use_properties, expected_entity, populate_expected_last",
+    "entities, expected_entity, populate_expected_last",
     [
         (
-                [InMemoryProduct(id=uuid4())], {}, {"name": "banana"},
-                InMemoryProduct(id=uuid4()), True),
+                [InMemoryProduct(id=uuid4())], InMemoryProduct(id=uuid4(), name="banana"), True
+        ),
     ],
     indirect=True,
 )
-def test_query_and_fetch_one_with_a_where_clause_using_an_unregistered_custom_filter_func_should_return_a_single_entity(
-        time_ns,
-        mocked_time_ns,
+def test_query_and_fetch_one_with_a_custom_filter_func_should_return_a_single_entity(
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         entities,
-        where_clause,
-        use_properties,
         expected_entity,
         populate_entities,
         populate_expected_last,
@@ -42,7 +37,7 @@ def test_query_and_fetch_one_with_a_where_clause_using_an_unregistered_custom_fi
     def banana_func(entities_: Iterable, field: str, value: Union[str, int]) -> filter:
         return filter(lambda e: getattr(e, field) == value, entities_)
 
-    composite_banana_func = runner(
+    partial_banana_func = runner(
         banana_func,
         field="name",
         value="banana",
@@ -50,7 +45,7 @@ def test_query_and_fetch_one_with_a_where_clause_using_an_unregistered_custom_fi
 
     # Act
     base_query: Query = getattr(unit_of_work.query(), expected_entity.__tablename__)()
-    result = base_query.where_with_composition([composite_banana_func]).fetch_one()
+    result = base_query.where_with_composition([partial_banana_func]).fetch_one()
     # Assert
     assert_that(
         result,

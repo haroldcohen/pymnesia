@@ -13,6 +13,7 @@ from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.entities.populate import *
 from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.query.expressions import limit
 
 
 @pytest.mark.parametrize(
@@ -24,11 +25,8 @@ from tests.common_utils.fixtures.misc import *
     indirect=True,
 )
 def test_query_an_entity_table_with_a_limit_should_return_a_number_of_limited_entities(
-        time_ns,
-        mocked_time_ns,
         unit_of_work,
         transaction,
-        expected_unit_of_work_memento,
         limit,
         entities,
         expected_entities,
