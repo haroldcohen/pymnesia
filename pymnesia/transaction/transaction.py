@@ -3,10 +3,11 @@
 from typing import Generator, List
 
 from pymnesia.common.originator_interface import OriginatorInterface
+from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
 
-__all__ = ["InMemoryTransaction"]
-
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+__all__ = [
+    "InMemoryTransaction",
+]
 
 
 class InMemoryTransaction:
