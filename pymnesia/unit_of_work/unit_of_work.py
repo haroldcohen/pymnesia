@@ -4,9 +4,9 @@ import time
 from copy import deepcopy
 
 from pymnesia.common.originator_interface import OriginatorInterface
+from pymnesia.query.engine.meta import query_engine_metaclass
 from pymnesia.unit_of_work.memento.meta import unit_of_work_metaclass
 from pymnesia.unit_of_work.meta import UnitOfWorkMeta
-from pymnesia.query.engine.engine import QueryEngine
 from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
 from pymnesia.entities.registry import registry
 
@@ -28,6 +28,11 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
             "UnitOfWorkMemento",
             (UnitOfWorkMemento, ),
             {},
+        )
+        self.__query_engine_cls = query_engine_metaclass(registry_=registry)(
+            "QueryEngine",
+            (),
+            {}
         )
         self.__setup()
 
@@ -78,4 +83,4 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
 
         :return: A query engine instantiated with the current unit of work state.
         """
-        return QueryEngine(unit_of_work=self)
+        return self.__query_engine_cls(unit_of_work=self)

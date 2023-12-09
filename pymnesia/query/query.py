@@ -13,6 +13,10 @@ from pymnesia.query.filter.relations import *  # pylint: disable=wildcard-import
 FIELD_OPERATOR_REGEX = re.compile(r'^(?P<field>\w+)::(?P<operator>\w+)$')
 RELATION_PROPERTY_REGEX = re.compile(r'^(?P<rel>\w+)\.(?P<rel_property>.*)$')
 
+__all__ = [
+    "Query"
+]
+
 
 class Query:
     """Allows to store a query parameters and run the query using a QueryRunner.
