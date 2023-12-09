@@ -6,7 +6,7 @@ import pytest
 
 __all__ = ["expected_unit_of_work_memento"]
 
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+from pymnesia.unit_of_work.memento.default import UnitOfWorkMemento
 
 
 @pytest.fixture()

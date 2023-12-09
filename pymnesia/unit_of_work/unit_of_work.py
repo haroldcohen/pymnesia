@@ -6,7 +6,7 @@ from copy import deepcopy
 from pymnesia.common.originator_interface import OriginatorInterface
 from pymnesia.unit_of_work.meta import UnitOfWorkMeta
 from pymnesia.query.engine.engine import QueryEngine
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+from pymnesia.unit_of_work.memento.default import UnitOfWorkMemento
 from pymnesia.entities.registry import registry
 
 __all__ = ["UnitOfWork"]

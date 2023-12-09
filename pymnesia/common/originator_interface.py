@@ -1,11 +1,10 @@
 """Provides with an interface for """
 from abc import ABC, abstractmethod
-
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
+from typing import Type
 
 
 class OriginatorInterface(ABC):
 
     @abstractmethod
-    def save(self) -> UnitOfWorkMemento:
+    def save(self) -> Type["UnitOfWorkMementoMeta"]:
         """Saves the current unit of work and returns a memento"""
