@@ -1,18 +1,17 @@
 """Provides with a memento for UnitOfWork.
 """
 from dataclasses import make_dataclass, field
-
-__all__ = ["UnitOfWorkMemento"]
-
 from typing import Dict
 from uuid import UUID
 
-from pymnesia.entities.registry import registry
+from pymnesia.entities.registry import registry  # pylint: disable=unused-import
+from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
+
+__all__ = ["UnitOfWorkMemento"]
 
 
 def make_fields(entities_registry) -> list:
-    """
-    Makes the required fields for UnitOfWorkMemento, based on the registered entities
+    """Makes the required fields for UnitOfWorkMemento, based on the registered entities.
     :param entities_registry: The registry to use for build.
 
     :return: A list of fields.
@@ -29,4 +28,32 @@ def make_fields(entities_registry) -> list:
     return fields
 
 
-UnitOfWorkMemento = make_dataclass('UnitOfWorkMemento', make_fields(registry))
+class UnitOfWorkMementoMeta(type):
+    """Metaclass for UnitOfWorkMemento.
+    """
+    _registry: PymnesiaRegistryInterface = None
+
+    def __new__(mcs, name, bases, attrs):  # pylint: disable=unused-argument
+        return make_dataclass('UnitOfWorkMemento', make_fields(mcs._registry))
+
+
+def unit_of_work_metaclass(registry_: PymnesiaRegistryInterface):
+    """UnitOfWorkMemento metaclass maker.
+
+    :param registry_:
+    :return:
+    """
+    return type(
+        UnitOfWorkMementoMeta.__name__,
+        (UnitOfWorkMementoMeta,),
+        {"_registry": registry_}
+    )
+
+
+class UnitOfWorkMemento(metaclass=unit_of_work_metaclass(registry_=registry)):
+    """Base class for UnitOfWorkMemento.
+
+    @DynamicAttrs"""
+
+    def __init__(self, **kwargs):
+        pass

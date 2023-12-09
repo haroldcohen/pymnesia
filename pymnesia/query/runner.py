@@ -2,12 +2,11 @@
 """
 from pymnesia.composition import composite
 from pymnesia.entities.entity import Entity
-from pymnesia.unit_of_work.memento import UnitOfWorkMemento
 
 
 class QueryRunner:
 
-    def __init__(self, entity_class, unit_of_work: UnitOfWorkMemento):
+    def __init__(self, entity_class, unit_of_work):
         self.__entity_class = entity_class
         self.__unit_of_work = unit_of_work
 
