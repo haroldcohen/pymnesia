@@ -1,6 +1,7 @@
 """Provides with unit tests to validate save and commit features.
 """
 from uuid import uuid4
+from dataclasses import asdict
 
 import pytest
 from hamcrest import assert_that, equal_to
@@ -43,8 +44,8 @@ def test_save_an_entity_and_commit_should_update_unit_of_work_with_an_entity(
     retrieved_entity = getattr(unit_of_work, expected_entity.__tablename__)[expected_entity.id]
     *_, last = transaction.history()
     assert_that(
-        last,
-        equal_to(expected_unit_of_work_memento)
+        asdict(last),
+        equal_to(asdict(expected_unit_of_work_memento))
     )
     assert_that(
         retrieved_entity,
@@ -78,8 +79,8 @@ def test_save_multiple_entities_and_commit_should_update_unit_of_work_with_multi
     # Assert
     *_, last = transaction.history()
     assert_that(
-        last,
-        equal_to(expected_unit_of_work_memento)
+        asdict(last),
+        equal_to(asdict(expected_unit_of_work_memento))
     )
     for expected_entity in expected_entities:
         retrieved_entity = getattr(unit_of_work, expected_entity.__tablename__)[expected_entity.id]
