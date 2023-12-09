@@ -4,6 +4,7 @@ import time
 from copy import deepcopy
 
 from pymnesia.common.originator_interface import OriginatorInterface
+from pymnesia.unit_of_work.meta import UnitOfWorkMeta
 from pymnesia.query.engine.engine import QueryEngine
 from pymnesia.unit_of_work.memento import UnitOfWorkMemento
 from pymnesia.entities.registry import registry
@@ -11,7 +12,7 @@ from pymnesia.entities.registry import registry
 __all__ = ["UnitOfWork"]
 
 
-class UnitOfWork(OriginatorInterface):
+class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
     """InMemory storage originator
 
     @DynamicAttrs"""
@@ -24,11 +25,8 @@ class UnitOfWork(OriginatorInterface):
         self.__replica = UnitOfWorkMemento(
             state=state,
         )
-        self.__setup()
-
-    def __setup(self):
         for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
-            self.__dict__[entity_cls_resolver.__tablename__] = {}
+            setattr(self, entity_cls_resolver.__tablename__, {})
 
     def save_entity(self, entity):
         """Saves an entity in the replica.

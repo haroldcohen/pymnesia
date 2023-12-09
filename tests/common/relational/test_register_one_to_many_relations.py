@@ -4,12 +4,12 @@ from uuid import UUID
 
 from hamcrest import assert_that, equal_to
 
-from tests.common_utils.fixtures.registry import *
-from pymnesia.entities.registry import registry
-from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.entities.make import *
+from tests.common_utils.fixtures.registry import *
+from pymnesia.entities.registry import registry
 from pymnesia.entities.relations import Relation
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.entities.make.relations.generate import generate_rel_entity_cls_params
