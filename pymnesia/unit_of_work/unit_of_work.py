@@ -4,9 +4,10 @@ import time
 from copy import deepcopy
 
 from pymnesia.common.originator_interface import OriginatorInterface
+from pymnesia.unit_of_work.memento.meta import unit_of_work_metaclass
 from pymnesia.unit_of_work.meta import UnitOfWorkMeta
 from pymnesia.query.engine.engine import QueryEngine
-from pymnesia.unit_of_work.memento.default import UnitOfWorkMemento
+from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
 from pymnesia.entities.registry import registry
 
 __all__ = ["UnitOfWork"]
@@ -22,8 +23,17 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
             state: int,
     ):
         self.__state = state
-        self.__replica = UnitOfWorkMemento(
-            state=state,
+        self.__replica = None
+        self.__unit_of_work_memento_cls = unit_of_work_metaclass(registry_=registry)(
+            "UnitOfWorkMemento",
+            (UnitOfWorkMemento, ),
+            {},
+        )
+        self.__setup()
+
+    def __setup(self):
+        self.__replica = self.__unit_of_work_memento_cls(
+            state=self.__state,
         )
         for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
             setattr(self, entity_cls_resolver.__tablename__, {})
@@ -43,7 +53,7 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
 
         :return: The memento of the saved state.
         """
-        self.__state = deepcopy(self.__replica.state)
+        self.__state = deepcopy(self.__replica.state)  # pylint: disable=no-member
         replica_values = {}
 
         for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
@@ -56,7 +66,7 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
             )
             replica_values[tablename] = values
 
-        memento = UnitOfWorkMemento(
+        memento = self.__unit_of_work_memento_cls(
             state=self.__state,
             **replica_values
         )
