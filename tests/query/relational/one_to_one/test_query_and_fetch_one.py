@@ -1,77 +1,67 @@
-"""Provides with unit test to validate the query feature for entities that have relations.
+"""Provides with unit tests to validate the query one entity feature.
 """
-from uuid import uuid4, UUID
+from functools import partial
+from uuid import UUID, uuid4
 
 import pytest
 from hamcrest import assert_that, equal_to
 
-from tests.common_utils.entities.order import InMemoryOrder
-from tests.common_utils.entities.invoice import InMemoryInvoice
-from tests.common_utils.entities.product import InMemoryProduct
-from tests.common_utils.entities.product_spec import InMemoryProductSpec
-from tests.common_utils.fixtures.unit_of_work import *
-from tests.common_utils.fixtures.unit_of_work.expected import *
-from tests.common_utils.fixtures.entities.expected import *
-from tests.common_utils.fixtures.entities.populate import *
-from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.unit_of_work import *
+from tests.common_utils.fixtures.transaction import *
+from tests.common_utils.fixtures.entities.make import *
+from tests.common_utils.fixtures.entities.expected import *
+from tests.common_utils.fixtures.entities.seed import *
+from tests.common_utils.fixtures.query.query import *
+from tests.common_utils.fixtures.registry import unregister_entity_classes
+from tests.common_utils.helpers.entities.make.relations.generate import generate_rel_entity_cls_params
+from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
+from tests.common_utils.helpers.entities.seeding import generate_seeds, generate_seed, generate_rel_seeds
 
 
-@pytest.mark.parametrize(
-    "expected_entity",
-    [
-        (InMemoryOrder(
-            id=uuid4(),
-            invoice_id=UUID("4e5c4d8e-6f2a-4cb9-bd9f-56631f544967")
-        )),
-        (InMemoryOrder(
-            id=uuid4(),
-            invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-        )),
-    ],
-    indirect=True,
-)
-def test_query_orders_should_return_the_first_order_with_a_loaded_invoice(
-        unit_of_work,
-        transaction,
-        expected_entity,
-        populate_entities,
-):
-    unit_of_work.save_entity(entity=InMemoryInvoice(id=expected_entity.invoice_id, order_id=expected_entity.id))
-    transaction.commit()
-    expected_entity.invoice = InMemoryInvoice(id=expected_entity.invoice_id, order_id=expected_entity.id)
-    # Act
-    result = getattr(unit_of_work.query(), expected_entity.__tablename__)().fetch_one()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entity)
+class TestQueryFetchOne:
+
+    @pytest.fixture(scope="class")
+    def entity_cls_params(self):
+        return generate_entity_cls_params(
+            class_name="EntityWithRelation",
+            fields_conf={
+                "id": UUID,
+            },
+            rel_entity_classes_params=[
+                generate_rel_entity_cls_params(
+                    class_name="RelatedEntity",
+                    fields_conf={"id": UUID},
+                ),
+            ],
+        )
+
+    @pytest.mark.parametrize(
+        "seeds",
+        [
+            generate_seeds(1, {"id": uuid4, "rels": {
+                "related_entity": generate_seed({"id": uuid4})
+            }}),
+            generate_seeds(2, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                "related_entity": partial(generate_seed, {"id": uuid4})
+            })}),
+        ],
+        indirect=True,
     )
-
-
-@pytest.mark.parametrize(
-    "expected_entity",
-    [
-        (InMemoryProduct(
-            id=uuid4(),
-            spec_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-        )),
-    ],
-    indirect=True,
-)
-def test_query_products_should_return_the_first_product_with_a_loaded_spec(
-        unit_of_work,
-        transaction,
-        expected_entity,
-        populate_entities,
-):
-    unit_of_work.save_entity(entity=InMemoryProductSpec(id=expected_entity.spec_id, product_id=expected_entity.id))
-    transaction.commit()
-    expected_entity.spec = InMemoryProductSpec(id=expected_entity.spec_id, product_id=expected_entity.id)
-    # Act
-    result = getattr(unit_of_work.query(), expected_entity.__tablename__)().fetch_one()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entity)
-    )
+    def test_query_fetch_one_should_return_the_first_entity(
+            self,
+            entity_cls_params,
+            fields_conf,
+            entity_cls,
+            seeds,
+            seeded_entities,
+            unit_of_work,
+            rel_entity_classes,
+            base_query,
+            unregister_entity_classes,
+    ):
+        result = base_query.fetch_one()
+        assert_that(
+            result,
+            equal_to(seeded_entities[0])
+        )

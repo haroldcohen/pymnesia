@@ -1,148 +1,100 @@
-"""Provides with unit test to validate the query with where clause feature for entities that have relations.
+"""Provides with unit tests to validate the query with where clause feature.
 """
-from uuid import uuid4, UUID
+import random
+from functools import partial
+from uuid import UUID, uuid4
 
 import pytest
 from hamcrest import assert_that, equal_to
 
-from tests.common_utils.entities.order import InMemoryOrder
-from tests.common_utils.entities.invoice import InMemoryInvoice
-from tests.common_utils.entities.product import InMemoryProduct
-from tests.common_utils.entities.proforma import InMemoryProforma
-from tests.common_utils.entities.product_spec import InMemoryProductSpec
-from tests.common_utils.fixtures.unit_of_work import *
-from tests.common_utils.fixtures.unit_of_work.expected import *
-from tests.common_utils.fixtures.entities.expected import *
-from tests.common_utils.fixtures.entities.populate import *
-from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
-from tests.common_utils.fixtures.query.expressions import where_clause
+from tests.common_utils.fixtures.unit_of_work import *
+from tests.common_utils.fixtures.transaction import *
+from tests.common_utils.fixtures.entities.make import *
+from tests.common_utils.fixtures.entities.expected import *
+from tests.common_utils.fixtures.entities.seed import *
+from tests.common_utils.fixtures.query.query import *
+from tests.common_utils.fixtures.registry import unregister_entity_classes
+from tests.common_utils.fixtures.query.expressions import where_clause, or_clauses
+from tests.common_utils.helpers.entities.make.relations.generate import generate_rel_entity_cls_params
+from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
+from tests.common_utils.helpers.entities.seeding import generate_seeds, generate_seed, generate_rel_seeds
+from pymnesia.entities.field import Field
 
 
-@pytest.mark.parametrize(
-    "entities, expected_entity, where_clause",
-    [
-        ([
-             InMemoryOrder(
-                 id=UUID("4e5c4d8e-6f2a-4cb9-bd9f-56631f544967"),
-                 invoice_id=UUID("da17c172-c67e-4980-af11-1184d320a342"),
-             ),
-             InMemoryInvoice(
-                id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-                order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             ),
-         ],
-         InMemoryOrder(
-             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")
-         ),
-         {"invoice.id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
-        ([
-             InMemoryOrder(
-                 id=UUID("4e5c4d8e-6f2a-4cb9-bd9f-56631f544967"),
-                 invoice_id=UUID("da17c172-c67e-4980-af11-1184d320a342"),
-             ),
-             InMemoryInvoice(
-                 id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-                 order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-                 total_with_vat=20,
-             ),
-         ],
-         InMemoryOrder(
-             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-         ),
-         {"invoice.total_with_vat": 20}),
-        ([
-             InMemoryOrder(id=uuid4()),
-             InMemoryProforma(
-                 id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
-                 invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-                 total_with_vat=32,
-                 order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             ),
-             InMemoryInvoice(
-                 id=uuid4(),
-                 number="2023-00001",
-                 order_id=uuid4(),
-             ),
-             InMemoryInvoice(
-                 id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-                 order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-                 proforma_id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
-                 proforma=InMemoryProforma(
-                     id=UUID("b45cbdcb-8a96-4ce1-8518-df8d12a1d4be"),
-                     invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-                     total_with_vat=32,
-                     order_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-                 ),
-                 number="2023-00001",
-             ),
-         ],
-         InMemoryOrder(
-             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             invoice_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-         ),
-         {"invoice.proforma.total_with_vat::gt": 30, "invoice.number::match": r'^2023-.*$'}),
-    ],
-    indirect=True,
-)
-def test_query_orders_with_a_where_clause_should_return_the_first_order_with_a_loaded_invoice(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        use_properties,
-        expected_entity,
-        populate_entities,
-):
-    expected_entity.invoice = entities[-1]
-    # Act
-    base_query = getattr(unit_of_work.query(), expected_entity.__tablename__)()
-    result = base_query.where(where_clause).fetch_one()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entity)
+# WARNING !!!
+# Need to rename test class
+class TestQueryWithWhereClause:
+
+    @pytest.fixture(scope="class")
+    def entity_cls_params(self):
+        return generate_entity_cls_params(
+            class_name="EntityWithRelation",
+            fields_conf={
+                "id": UUID,
+            },
+            rel_entity_classes_params=[
+                # WARNING !!!
+                # Need to rename entity once unit of work is scoped
+                generate_rel_entity_cls_params(
+                    class_name="RelatedEntity",
+                    fields_conf={
+                        "id": UUID,
+                        "int_f": (int, Field(default=1))
+                    },
+                ),
+            ],
+        )
+
+    # WARNING !!!
+    # Need to rename test
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause",
+        [
+            (
+                    generate_seeds(1, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                        "related_entity": partial(generate_seed, {"id": uuid4})
+                    })}),
+                    generate_seeds(1, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                        "related_entity": partial(generate_seed, {"id": uuid4, "int_f": 2})
+                    })}),
+                    {"related_entity.int_f": 2}
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                        "related_entity": partial(generate_seed, {
+                            "id": uuid4,
+                            "int_f": partial(random.randint, 1, 5)
+                        })
+                    })}),
+                    generate_seeds(3, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                        "related_entity": partial(generate_seed, {
+                            "id": uuid4,
+                            "int_f": partial(random.randint, 6, 10)
+                        })
+                    })}),
+                    {"related_entity.int_f::gte": 6}
+            ),
+        ],
+        indirect=True,
     )
-
-
-@pytest.mark.parametrize(
-    "entities, expected_entity, where_clause",
-    [
-        ([
-             InMemoryProduct(
-                 id=UUID("4e5c4d8e-6f2a-4cb9-bd9f-56631f544967"),
-                 spec_id=UUID("da17c172-c67e-4980-af11-1184d320a342"),
-             ),
-             InMemoryProductSpec(
-                id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-                product_id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             ),
-         ],
-         InMemoryProduct(
-             id=UUID("0f91e357-cd79-4a6a-b6ba-d077ebd58d26"),
-             spec_id=UUID("69f08c92-0641-41d4-923a-47d5276bd3dc"),
-         ),
-         {"spec_id": UUID("69f08c92-0641-41d4-923a-47d5276bd3dc")}),
-    ],
-    indirect=True,
-)
-def test_query_products_with_a_where_clause_should_return_the_first_product_with_a_loaded_spec(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        use_properties,
-        expected_entity,
-        populate_entities,
-):
-    expected_entity.spec = entities[-1]
-    # Act
-    base_query = getattr(unit_of_work.query(), expected_entity.__tablename__)()
-    result = base_query.where(where_clause).fetch_one()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entity)
-    )
+    def test_query_fetch_one_should_return_the_first_entity(
+            self,
+            entity_cls_params,
+            fields_conf,
+            entity_cls,
+            seeds,
+            seeded_entities,
+            expected_seeds,
+            expected_entities,
+            where_clause,
+            unit_of_work,
+            rel_entity_classes,
+            base_query,
+            unregister_entity_classes,
+    ):
+        result = base_query.where(where_clause).fetch()
+        assert_that(
+            result,
+            equal_to(expected_entities)
+        )

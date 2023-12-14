@@ -5,11 +5,11 @@ from uuid import UUID, uuid4
 import pytest
 from hamcrest import assert_that, equal_to
 
-from tests.common_utils.fixtures.entities.expected import *
-from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
+from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.entities.make import *
-from tests.common_utils.fixtures.registry import *
+from tests.common_utils.fixtures.entities.expected import *
+from tests.common_utils.fixtures.registry import unregister_entity_classes
 from pymnesia.entities.registry import registry
 from pymnesia.entities.field import Field
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params

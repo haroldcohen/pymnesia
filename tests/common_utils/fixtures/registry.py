@@ -4,10 +4,12 @@ import pytest
 
 from pymnesia.entities.registry import registry
 
-_all__ = ["unregister_entity_classes"]
+_all__ = [
+    "unregister_entity_classes",
+]
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def unregister_entity_classes(
         entity_cls,
         rel_entity_classes,
