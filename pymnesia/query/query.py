@@ -22,6 +22,16 @@ class Query:
     """Allows to store a query parameters and run the query using a QueryRunner.
     """
 
+    __slots__ = [
+        "__entity_class",
+        "__unit_of_work",
+        "__query_runner",
+        "__limit",
+        "__query_functions",
+        "__or_functions",
+        "__order_by_functions",
+    ]
+
     def __init__(self, entity_class, unit_of_work):
         self.__entity_class = entity_class
         self.__unit_of_work = unit_of_work
