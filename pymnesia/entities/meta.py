@@ -8,6 +8,8 @@ from pymnesia.entities.entity_cls_conf import EntityClsConf
 from pymnesia.entities.field import UNDEFINED, Field
 from pymnesia.entities.entity import Entity
 from pymnesia.entities.registry import registry
+from pymnesia.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
+from pymnesia.entities.registry.exceptions.missing_tablename import MissingTablenameException
 from pymnesia.entities.relations import Relation
 from pymnesia.entities.entity_resolver import EntityClassResolver
 
@@ -25,6 +27,9 @@ class EntityMeta(type):
         fields = []
         relation_fields = {}
         relations = {}
+
+        _validate_entity_cls_declaration(attrs=attrs)
+
         tablename = attrs["__tablename__"]
         conf = EntityClsConf()
 
@@ -383,3 +388,16 @@ def _build_foreign_key_name(
     if relation_type == "one_to_many":
         return relation_name[0:-1] + "_ids"
     return relation_name + "_id"
+
+
+def _validate_entity_cls_declaration(attrs: Dict):
+    """Validates that an entity class was correctly required.
+
+    :param attrs: The attributes of the declared entity class.
+    :return: None
+    """
+    if "__tablename__" not in attrs.keys():
+        raise MissingTablenameException
+
+    if "id" not in attrs["__annotations__"].keys():
+        raise MissingPrimaryKeyException
