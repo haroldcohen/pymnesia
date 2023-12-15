@@ -22,7 +22,7 @@ from tests.common_utils.helpers.entities.seeding import generate_seeds, generate
 from pymnesia.entities.field import Field
 
 
-class TestOneToManyRelationalQueryWithWhereClause:
+class TestOneToManyRelationalQueryWithNumericWhereClause:
 
     @pytest.fixture(scope="class")
     def entity_cls_params(self):
@@ -63,6 +63,62 @@ class TestOneToManyRelationalQueryWithWhereClause:
                         "relations": partial(generate_seeds, 2, {"id": uuid4, "int_f": partial(random.randint, 2, 5)})
                     })}),
                     {"relations.int_f::gte": 2}
+            ),
+        ],
+        indirect=True,
+    )
+    def test_query_with_a_where_clause_should_return_one_or_more_entity_with_loaded_relations(
+            self,
+            fields_conf,
+            entity_cls,
+            seeds,
+            seeded_entities,
+            expected_seeds,
+            expected_entities,
+            unit_of_work,
+            base_query,
+            where_clause,
+            unregister_entity_classes,
+    ):
+        result = base_query.where(where_clause).fetch()
+        assert_that(
+            result,
+            equal_to(expected_entities)
+        )
+
+
+class TestOneToManyRelationalQueryWithStringWhereClause:
+
+    @pytest.fixture(scope="class")
+    def entity_cls_params(self):
+        return generate_entity_cls_params(
+            class_name="EntityWithStrRelation",
+            fields_conf={
+                "id": UUID,
+            },
+            rel_entity_classes_params=[
+                generate_rel_entity_cls_params(
+                    class_name="Relation",
+                    fields_conf={
+                        "id": UUID,
+                        "str_f": (str, Field(default="banana"))
+                    },
+                    relation_type="many_to_one",
+                ),
+            ],
+        )
+
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause",
+        [
+            (
+                    generate_seeds(1, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                        "relations": partial(generate_seeds, 2, {"id": uuid4})
+                    })}),
+                    generate_seeds(2, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                        "relations": partial(generate_seeds, 1, {"id": uuid4, "str_f": "pear"})
+                    })}),
+                    {"relations.str_f": "pear"}
             ),
         ],
         indirect=True,

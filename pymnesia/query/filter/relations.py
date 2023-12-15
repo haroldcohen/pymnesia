@@ -25,7 +25,8 @@ def filter_rel_eq(entities: Iterable, field: str, value: Any, unit_of_work, rela
 
         return filter(lambda e: getattr(e, relation.key) in filtered_rel_ids, entities)
 
-    grouped_filtered_rels = groupby(rels, key=lambda e: e.entity_with_relation_id)
+    reverse_foreign_key_name = relation.reverse + "_id"
+    grouped_filtered_rels = groupby(rels, key=lambda e: getattr(e, reverse_foreign_key_name))
     filtered_ids = []
     for key, group in grouped_filtered_rels:  # pylint: disable=unused-variable
         filtered_ids.append(key)
