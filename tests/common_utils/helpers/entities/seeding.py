@@ -72,11 +72,21 @@ def seed_rels(
     seeded_rels = []
     for rel_name, rel_seed in rel_seeds.items():
         rel_conf = entity_cls.__conf__.relations[rel_name]
-        rel_seed[rel_conf.reverse + "_id"] = seeded_entity.id
-        rel_entity = rel_conf.entity_cls_resolver(**rel_seed)
-        setattr(seeded_entity, rel_name, rel_entity)
-        setattr(seeded_entity, rel_conf.key, rel_entity.id)
-        seeded_rels.append(rel_entity)
+        if isinstance(rel_seed, list):
+            for rel_seed_ in rel_seed:
+                rel_seed_[rel_conf.reverse + "_id"] = seeded_entity.id
+                rel_entity = rel_conf.entity_cls_resolver(**rel_seed_)
+                rels = getattr(seeded_entity, rel_name)
+                rels.append(rel_entity)
+                rel_ids = getattr(seeded_entity, rel_conf.key)
+                rel_ids.append(rel_entity.id)
+                seeded_rels.append(rel_entity)
+        else:
+            rel_seed[rel_conf.reverse + "_id"] = seeded_entity.id
+            rel_entity = rel_conf.entity_cls_resolver(**rel_seed)
+            setattr(seeded_entity, rel_name, rel_entity)
+            setattr(seeded_entity, rel_conf.key, rel_entity.id)
+            seeded_rels.append(rel_entity)
 
     return seeded_rels
 

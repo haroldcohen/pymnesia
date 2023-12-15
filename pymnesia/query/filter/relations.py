@@ -1,4 +1,5 @@
 from typing import Any, Iterable
+from itertools import groupby
 
 from pymnesia.entities.relations import Relation
 from pymnesia.query.filter.registry import register_filter_func
@@ -18,6 +19,16 @@ def filter_rel_eq(entities: Iterable, field: str, value: Any, unit_of_work, rela
     """
     base_query = getattr(unit_of_work.query(), relation.entity_cls_resolver.__tablename__)()
     rels = base_query.where({field: value}).fetch()
-    filtered_rel_ids = [rel.id for rel in rels]
 
-    return filter(lambda e: getattr(e, relation.key) in filtered_rel_ids, entities)
+    if relation.relation_type == "one_to_one":
+        filtered_rel_ids = [rel.id for rel in rels]
+
+        return filter(lambda e: getattr(e, relation.key) in filtered_rel_ids, entities)
+
+    reverse_foreign_key_name = relation.reverse + "_id"
+    grouped_filtered_rels = groupby(rels, key=lambda e: getattr(e, reverse_foreign_key_name))
+    filtered_ids = []
+    for key, group in grouped_filtered_rels:  # pylint: disable=unused-variable
+        filtered_ids.append(key)
+
+    return filter(lambda e: e.id in filtered_ids, entities)
