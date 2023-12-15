@@ -19,7 +19,7 @@ from tests.common_utils.helpers.entities.make.generate import generate_entity_cl
 from tests.common_utils.helpers.entities.seeding import generate_seeds, generate_seed, generate_rel_seeds
 
 
-class TestQueryFetchOne:
+class TestOneToOneRelationalQueryFetch:
 
     @pytest.fixture(scope="class")
     def entity_cls_params(self):
@@ -30,7 +30,7 @@ class TestQueryFetchOne:
             },
             rel_entity_classes_params=[
                 generate_rel_entity_cls_params(
-                    class_name="RelatedEntity",
+                    class_name="Relation",
                     fields_conf={"id": UUID},
                 ),
             ],
@@ -40,23 +40,21 @@ class TestQueryFetchOne:
         "seeds",
         [
             generate_seeds(1, {"id": uuid4, "rels": {
-                "related_entity": generate_seed({"id": uuid4})
+                "relation": generate_seed({"id": uuid4})
             }}),
-            generate_seeds(2, {"id": uuid4, "rels": partial(generate_rel_seeds, {
-                "related_entity": partial(generate_seed, {"id": uuid4})
+            generate_seeds(1, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                "relation": partial(generate_seed, {"id": uuid4})
             })}),
         ],
         indirect=True,
     )
-    def test_query_fetch_one_should_return_the_first_entity(
+    def test_query_fetch_one_should_return_the_first_entity_with_loaded_relations(
             self,
-            entity_cls_params,
+            rel_entity_classes,
             fields_conf,
-            entity_cls,
             seeds,
             seeded_entities,
             unit_of_work,
-            rel_entity_classes,
             base_query,
             unregister_entity_classes,
     ):
@@ -64,4 +62,32 @@ class TestQueryFetchOne:
         assert_that(
             result,
             equal_to(seeded_entities[0])
+        )
+
+    @pytest.mark.parametrize(
+        "seeds",
+        [
+            generate_seeds(1, {"id": uuid4, "rels": {
+                "relation": generate_seed({"id": uuid4})
+            }}),
+            generate_seeds(2, {"id": uuid4, "rels": partial(generate_rel_seeds, {
+                "relation": partial(generate_seed, {"id": uuid4})
+            })}),
+        ],
+        indirect=True,
+    )
+    def test_query_fetch_should_return_every_entity_with_loaded_relations(
+            self,
+            rel_entity_classes,
+            fields_conf,
+            seeds,
+            seeded_entities,
+            unit_of_work,
+            base_query,
+            unregister_entity_classes,
+    ):
+        result = base_query.fetch()
+        assert_that(
+            result,
+            equal_to(seeded_entities)
         )

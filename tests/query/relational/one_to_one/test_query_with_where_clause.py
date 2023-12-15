@@ -22,9 +22,7 @@ from tests.common_utils.helpers.entities.seeding import generate_seeds, generate
 from pymnesia.entities.field import Field
 
 
-# WARNING !!!
-# Need to rename test class
-class TestQueryWithWhereClause:
+class TestOneToOneRelationalQueryWithWhereClause:
 
     @pytest.fixture(scope="class")
     def entity_cls_params(self):
@@ -34,8 +32,6 @@ class TestQueryWithWhereClause:
                 "id": UUID,
             },
             rel_entity_classes_params=[
-                # WARNING !!!
-                # Need to rename entity once unit of work is scoped
                 generate_rel_entity_cls_params(
                     class_name="RelatedEntity",
                     fields_conf={
@@ -46,8 +42,6 @@ class TestQueryWithWhereClause:
             ],
         )
 
-    # WARNING !!!
-    # Need to rename test
     @pytest.mark.parametrize(
         "seeds, expected_seeds, where_clause",
         [
@@ -78,19 +72,17 @@ class TestQueryWithWhereClause:
         ],
         indirect=True,
     )
-    def test_query_fetch_one_should_return_the_first_entity(
+    def test_query_with_a_where_clause_should_return_one_or_more_entity_with_loaded_relations(
             self,
-            entity_cls_params,
             fields_conf,
             entity_cls,
             seeds,
             seeded_entities,
             expected_seeds,
             expected_entities,
-            where_clause,
             unit_of_work,
-            rel_entity_classes,
             base_query,
+            where_clause,
             unregister_entity_classes,
     ):
         result = base_query.where(where_clause).fetch()

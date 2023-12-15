@@ -40,16 +40,14 @@ class TestQueryWithLimit:
     )
     def test_query_an_entity_table_with_a_limit_should_return_a_number_of_limited_entities(
             self,
-            entity_cls_params,
-            entity_cls,
             seeds,
             expected_seeds,
             expected_entities,
             seeded_entities,
-            limit,
             unit_of_work,
-            unregister_entity_classes,
             base_query,
+            limit,
+            unregister_entity_classes,
     ):
         result = base_query.limit(limit).fetch()
         assert_that(

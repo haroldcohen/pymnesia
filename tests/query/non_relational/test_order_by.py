@@ -94,15 +94,14 @@ class TestQueryOrderByStrField:
     )
     def test_query_and_order_by_should_return_ordered_entities(
             self,
-            entity_cls_params,
             entity_cls,
             seeds,
             seeded_entities,
             unit_of_work,
-            unregister_entity_classes,
             base_query,
             direction,
             order_by_key,
+            unregister_entity_classes,
     ):
         result = base_query.order_by(direction, order_by_key).fetch()
         sorted_entities = sorted(seeded_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")

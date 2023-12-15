@@ -45,15 +45,13 @@ class TestQueryWithComposition:
     )
     def test_query_and_fetch_one_with_composition_should_return_one_or_more_filtered_entities(
             self,
-            entity_cls_params,
-            entity_cls,
             seeds,
             expected_seeds,
             expected_entities,
             seeded_entities,
             unit_of_work,
-            unregister_entity_classes,
             base_query,
+            unregister_entity_classes,
     ):
         def banana_func(entities_: Iterable, field: str, value: Union[str, int]) -> filter:
             return filter(lambda e: getattr(e, field) == value, entities_)

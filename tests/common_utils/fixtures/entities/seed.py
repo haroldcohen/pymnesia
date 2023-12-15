@@ -1,14 +1,17 @@
 """Provides with fixtures to seed entities.
 """
+from typing import List, Dict
+
 import pytest
 
+from pymnesia.entities.entity_resolver import EntityClassResolver
 from tests.common_utils.helpers.entities.seeding import generate_entities
-from tests.common_utils.helpers.entities.seeding import seed_entities
+from tests.common_utils.helpers.entities.seeding import water_seeds
 
 __all__ = [
     "expected_seeds",
     "seeds",
-    "water_seeds",
+    "do_water_seeds",
     "seeded_entities",
 ]
 
@@ -16,21 +19,21 @@ __all__ = [
 # pylint: disable=redefined-outer-name
 
 @pytest.fixture()
-def expected_seeds(request):
+def expected_seeds(request) -> List:
     if hasattr(request, "param"):
         return request.param
     return []
 
 
 @pytest.fixture()
-def seeds(request):
+def seeds(request) -> List:
     if hasattr(request, "param"):
         return request.param
     return []
 
 
 @pytest.fixture()
-def water_seeds(request):
+def do_water_seeds(request) -> bool:
     if hasattr(request, "param"):
         return request.param
     return True
@@ -38,14 +41,25 @@ def water_seeds(request):
 
 @pytest.fixture()
 def seeded_entities(
-        entity_cls,
-        seeds,
-        expected_seeds,
-        expected_entities,
+        entity_cls: EntityClassResolver,
+        seeds: List[Dict],
+        expected_seeds: List[Dict],
+        expected_entities: List,
         unit_of_work,
         transaction,
-        water_seeds,
-):
+        do_water_seeds: bool,
+) -> List:
+    """Seed and saves entities and expected entities.
+
+    :param entity_cls: The entity class (or resolver) to use for seeding.
+    :param seeds: The seeds to seed.
+    :param expected_seeds: The expected seeds to seed.
+    :param expected_entities: An empty list that will be mutated with expected entities.
+    :param unit_of_work: The unit of work to use for seeding.
+    :param transaction: The transaction to use for seeding.
+    :param do_water_seeds: Whether the seeded entities should be saved in the unit of work or not.
+    :return: A list of seeded entities, relations excluded.
+    """
     seeded = []
     expected_seeds, expected_rel_seeds = generate_entities(
         seeds=expected_seeds,
@@ -58,11 +72,11 @@ def seeded_entities(
         entity_cls=entity_cls,
     )
     seeded.extend(entity_seeds)
-    if water_seeds:
-        seed_entities(seeds=expected_seeds, unit_of_work=unit_of_work)
-        seed_entities(seeds=expected_rel_seeds, unit_of_work=unit_of_work)
-        seed_entities(seeds=entity_seeds, unit_of_work=unit_of_work)
-        seed_entities(seeds=rel_seeds, unit_of_work=unit_of_work)
+    if do_water_seeds:
+        water_seeds(seeds=expected_seeds, unit_of_work=unit_of_work)
+        water_seeds(seeds=expected_rel_seeds, unit_of_work=unit_of_work)
+        water_seeds(seeds=entity_seeds, unit_of_work=unit_of_work)
+        water_seeds(seeds=rel_seeds, unit_of_work=unit_of_work)
         transaction.commit()
 
     return seeded

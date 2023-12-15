@@ -53,16 +53,14 @@ class TestQueryWithNumericWhereClause:
     )
     def test_query_and_fetch_one_with_a_where_eq_clause_should_return_a_single_filtered_entity(
             self,
-            entity_cls_params,
-            entity_cls,
             seeds,
             expected_seeds,
             expected_entities,
             seeded_entities,
             unit_of_work,
-            unregister_entity_classes,
             base_query,
             where_clause,
+            unregister_entity_classes,
     ):
         result = base_query.where(where_clause).fetch_one()
         assert_that(
@@ -83,16 +81,14 @@ class TestQueryWithNumericWhereClause:
     )
     def test_query_and_fetch_with_a_where_clause_eq_should_return_multiple_filtered_entities(
             self,
-            entity_cls_params,
-            entity_cls,
             seeds,
             expected_seeds,
             expected_entities,
             seeded_entities,
             unit_of_work,
-            unregister_entity_classes,
             base_query,
             where_clause,
+            unregister_entity_classes,
     ):
         result = base_query.where(where_clause).fetch()
         assert_that(
@@ -103,7 +99,6 @@ class TestQueryWithNumericWhereClause:
     @pytest.mark.parametrize(
         "seeds, expected_seeds, where_clause",
         [
-            # WARNING !!! Need to test floats as well
             (
                     generate_seeds(2, {"id": uuid4, "int_f": 1}),
                     generate_seeds(3, ({"id": uuid4, "int_f": 2})),
@@ -138,6 +133,12 @@ class TestQueryWithNumericWhereClause:
                     generate_seeds(2, {"id": uuid4, "int_f": partial(random.randint, 3, 5)}),
                     generate_seeds(3, ({"id": uuid4, "int_f": partial(random.randint, 7, 10)})),
                     {"int_f::in": [7, 8, 9, 10]},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "float_f": 2.1}),
+                    generate_seeds(1, ({"id": uuid4, "float_f": 2.2})) +
+                    generate_seeds(1, ({"id": uuid4, "float_f": 2.3})),
+                    {"float_f::in": [2.2, 2.3]},
             ),
         ],
         indirect=True,

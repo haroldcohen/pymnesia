@@ -20,9 +20,7 @@ def expected_unit_of_work_memento(expected_entities) -> UnitOfWorkMemento:
         (UnitOfWorkMemento,),
         {},
     )
-    memento = uow_cls(
-        state=time.time_ns(),
-    )
+    memento = uow_cls(state=time.time_ns())
     for expected_entity_ in expected_entities:
         table = getattr(memento, expected_entity_.__tablename__)
         table[expected_entity_.id] = expected_entity_

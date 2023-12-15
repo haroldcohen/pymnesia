@@ -30,7 +30,7 @@ class TestSaveAndCommit:
         )
 
     @pytest.fixture(scope="class")
-    def water_seeds(self):
+    def do_water_seeds(self):
         return False
 
     @pytest.mark.parametrize(

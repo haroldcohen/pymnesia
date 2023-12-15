@@ -60,17 +60,15 @@ class TestQueryWithWhereOrClause:
     )
     def test_query_and_fetch_with_a_where_or_clause_should_return_one_or_more_filtered_entities(
             self,
-            entity_cls_params,
-            entity_cls,
             seeds,
             expected_seeds,
             expected_entities,
             seeded_entities,
             unit_of_work,
-            unregister_entity_classes,
             base_query,
             where_clause,
             or_clauses,
+            unregister_entity_classes,
     ):
         query = base_query.where(where_clause)
         for or_clause in or_clauses:
