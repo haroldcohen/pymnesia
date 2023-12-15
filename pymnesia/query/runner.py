@@ -6,6 +6,11 @@ from pymnesia.entities.entity import Entity
 
 class QueryRunner:
 
+    __slots__ = [
+        "__entity_class",
+        "__unit_of_work",
+    ]
+
     def __init__(self, entity_class, unit_of_work):
         self.__entity_class = entity_class
         self.__unit_of_work = unit_of_work
