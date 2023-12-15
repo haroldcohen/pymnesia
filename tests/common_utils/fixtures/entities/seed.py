@@ -19,14 +19,24 @@ __all__ = [
 # pylint: disable=redefined-outer-name
 
 @pytest.fixture()
-def expected_seeds(request) -> List:
+def expected_seeds(request) -> List[Dict]:
+    """Provides with a fixture to define expected entity seeds.
+
+    :param request: The parametrized fixture.
+    :return: A list of expected seeds. Default to empty list.
+    """
     if hasattr(request, "param"):
         return request.param
     return []
 
 
 @pytest.fixture()
-def seeds(request) -> List:
+def seeds(request) -> List[Dict]:
+    """Provides with a fixture to define entity seeds.
+
+    :param request: The parametrized fixture.
+    :return: A list of seeds. Default to empty list.
+    """
     if hasattr(request, "param"):
         return request.param
     return []
@@ -34,6 +44,11 @@ def seeds(request) -> List:
 
 @pytest.fixture()
 def do_water_seeds(request) -> bool:
+    """Provides with a fixture to enable/disable seeds watering (the action of saving seeded entities).
+
+    :param request: The parametrized fixture.
+    :return: A boolean that will be used later for seeding or not the unit of work. Default to True.
+    """
     if hasattr(request, "param"):
         return request.param
     return True

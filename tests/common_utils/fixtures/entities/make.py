@@ -6,8 +6,10 @@ import pytest
 
 from pymnesia.api.entities import relation
 from pymnesia.entities.relations import Relation
+from pymnesia.entities.entity_resolver import EntityClassResolver
 from tests.common_utils.helpers.entities.make.types import EntityClsParams
 from tests.common_utils.helpers.entities.make.make import make_entity_class
+from tests.common_utils.helpers.types import FieldsConf
 
 # pylint: disable=redefined-outer-name
 
@@ -21,12 +23,27 @@ __all__ = [
 
 
 @pytest.fixture(scope="class")
-def entity_cls_params(request):
+def entity_cls_params(request) -> EntityClsParams:
+    """Provides with parameters to dynamically build an entity class without having to declare it in a hard coded way.
+
+    :param request: The parametrized fixture.
+    :return: The entity class parameters.
+    """
     return request.param
 
 
 @pytest.fixture(scope="class")
-def fields_conf(entity_cls_params: EntityClsParams, rel_entity_classes):  # pylint: disable=unused-argument
+def fields_conf(
+        entity_cls_params: EntityClsParams,
+        rel_entity_classes: List[EntityClassResolver],  # pylint: disable=unused-argument
+) -> FieldsConf:
+    """Provides with the field configurations passed in entity_cls_params.
+    The relation field configurations are modified accordingly.
+
+    :param entity_cls_params: Entity class parameters provided by the matching fixture.
+    :param rel_entity_classes: A list of related class generated in the matching fixture.
+    :return: A dictionary of field confs.
+    """
     for related_entity_class_params in entity_cls_params.rel_entity_classes_params:
         if related_entity_class_params.relation_type == "one_to_one":
             rel_conf = related_entity_class_params.cls_resolver
@@ -51,12 +68,16 @@ def fields_conf(entity_cls_params: EntityClsParams, rel_entity_classes):  # pyli
 
 
 @pytest.fixture(scope="class")
-def entity_cls(entity_cls_params: EntityClsParams, rel_entity_classes):  # pylint: disable=unused-argument
-    """Returns a dynamically made entity class resolver.
+def entity_cls(
+        entity_cls_params: EntityClsParams,
+        rel_entity_classes: List[EntityClassResolver],
+):  # pylint: disable=unused-argument
+    """Provides with a dynamically created entity class resolver,
+    based on given entity class parameters.
 
-    :param entity_cls_params:
-    :param rel_entity_classes:
-    :return:
+    :param entity_cls_params: Entity class parameters provided by the matching fixture.
+    :param rel_entity_classes: A list of related class generated in the matching fixture.
+    :return: An dynamically created entity class resolver.
     """
     entity_cls_ = make_entity_class(
         name=entity_cls_params.name,
@@ -84,7 +105,13 @@ def entity_cls(entity_cls_params: EntityClsParams, rel_entity_classes):  # pylin
 
 
 @pytest.fixture(scope="class")
-def rel_entity_classes(entity_cls_params: EntityClsParams):
+def rel_entity_classes(entity_cls_params: EntityClsParams) -> List[EntityClassResolver]:
+    """Provides with dynamically created related entity class resolvers,
+    based on entity class parameters.
+
+    :param entity_cls_params: Entity class parameters provided by the matching fixture.
+    :return: A list of related entity class resolvers.
+    """
     entity_classes = []
 
     for rel_entity_cls_param in entity_cls_params.rel_entity_classes_params:
@@ -102,7 +129,14 @@ def rel_entity_classes(entity_cls_params: EntityClsParams):
 @pytest.fixture(scope="class")
 def owned_relations(
         entity_cls,  # pylint: disable=unused-argument
-        entity_cls_params,
-        rel_entity_classes,  # pylint: disable=unused-argument
-):
+        entity_cls_params: EntityClsParams,
+        rel_entity_classes: List[EntityClassResolver],  # pylint: disable=unused-argument
+) -> List[str]:
+    """Provides with a list of owned relations for a given entity class.
+
+    :param entity_cls: The entity class for which to list the owned relations.
+    :param entity_cls_params: Entity class parameters provided by the matching fixture.
+    :param rel_entity_classes: A list of related class generated in the matching fixture.
+    :return: A list of owned relation names.
+    """
     return [rel_entity_cls_params.single_form for rel_entity_cls_params in entity_cls_params.rel_entity_classes_params]
