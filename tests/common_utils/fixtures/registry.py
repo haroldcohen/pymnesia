@@ -15,7 +15,6 @@ def unregister_entity_classes(
         rel_entity_classes,
 ):
     """Allows to unregister an entity class.
-    Useful when testing using the make fixture.
 
     :param entity_cls: The main entity class to unregister.
     :param rel_entity_classes: The related entity classes to unregister.

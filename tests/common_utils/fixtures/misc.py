@@ -12,13 +12,26 @@ __all__ = [
 
 @pytest.fixture()
 def time_ns() -> int:
-    """Returns the current timestamp. To be used before time_ns is mocked."""
+    """Provides with the current timestamp. To be used before time_ns is mocked.
+    This fixture is likely to change in the near future, in order to handle more than one increment.
+
+    :return: A timestamp to be used by mocked_time_ns.
+    """
     return time.time_ns()
 
 
 @pytest.fixture()
-def mocked_time_ns(time_ns: int, mocker):  # pylint: disable=redefined-outer-name
-    """Mocks the time.time_ns() function to return the current timestamp + 1"""
+def mocked_time_ns(
+        time_ns: int,
+        mocker,
+):  # pylint: disable=redefined-outer-name
+    """Provides with a time_ns mocker.
+    Mocks the time.time_ns() function so that it returns the time_ns + 1.
+
+    :param time_ns: The time_ns fixture result to be used as the base for the time_ns mock function.
+    :param mocker: Pytest mocker module.
+    :return: None
+    """
 
     def time_ns_mocker() -> int:
         """time.time_ns() mocker."""

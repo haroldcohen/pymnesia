@@ -24,73 +24,73 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     class_name="EntityWithFloatFields",
                     fields_conf={
                         "id": UUID,
-                        "float_field": float,
-                        "float_field_with_default": (float, Field(default=5.5)),
+                        "float_f": float,
+                        "float_f_w_default": (float, Field(default=5.5)),
                     },
                     rel_entity_classes_params=[],
                 ),
-                {"id": uuid4(), "float_field": 0.5, "float_field_with_default": 5.5}
+                {"id": uuid4(), "float_f": 0.5, "float_f_w_default": 5.5}
         ),
         (
                 generate_entity_cls_params(
                     class_name="EntityWithIntFields",
                     fields_conf={
                         "id": UUID,
-                        "int_field": int,
-                        "int_field_with_default": (int, Field(default=1)),
+                        "int_f": int,
+                        "int_f_w_default": (int, Field(default=1)),
                     },
                     rel_entity_classes_params=[],
                 ),
-                {"id": uuid4(), "int_field": 5, "int_field_with_default": 1}
+                {"id": uuid4(), "int_f": 5, "int_f_w_default": 1}
         ),
         (
                 generate_entity_cls_params(
                     class_name="EntityWithStrFields",
                     fields_conf={
                         "id": UUID,
-                        "str_field": dict,
-                        "str_field_with_default": (dict, Field(default="Chocolate pudding !")),
+                        "str_f": dict,
+                        "str_f_w_default": (dict, Field(default="Chocolate pudding !")),
                     },
                     rel_entity_classes_params=[],
                 ),
-                {"id": uuid4(), "str_field": "Chocolate pudding", "str_field_with_default": "Chocolate pudding !"}
+                {"id": uuid4(), "str_f": "Chocolate pudding", "str_f_w_default": "Chocolate pudding !"}
         ),
         (
                 generate_entity_cls_params(
                     class_name="EntityWithTupleFields",
                     fields_conf={
                         "id": UUID,
-                        "tuple_field": tuple,
-                        "tuple_field_with_default": (tuple, Field(default=("a", "b"))),
-                        "tuple_field_with_default_factory": (tuple, Field(default_factory=lambda: ())),
+                        "tuple_f": tuple,
+                        "tuple_f_w_default": (tuple, Field(default=("a", "b"))),
+                        "tuple_f_w_default_factory": (tuple, Field(default_factory=lambda: ())),
                     },
                     rel_entity_classes_params=[],
                 ),
-                {"id": uuid4(), "tuple_field": ("chocolate", "pudding"), "tuple_field_with_default_factory": ()}
+                {"id": uuid4(), "tuple_f": ("chocolate", "pudding"), "tuple_f_w_default_factory": ()}
         ),
         (
                 generate_entity_cls_params(
                     class_name="EntityWithDictFields",
                     fields_conf={
                         "id": UUID,
-                        "dict_field": dict,
-                        "dict_field_with_default_factory": (dict, Field(default_factory=lambda: {})),
+                        "dict_f": dict,
+                        "dict_f_w_default_factory": (dict, Field(default_factory=lambda: {})),
                     },
                     rel_entity_classes_params=[],
                 ),
-                {"id": uuid4(), "dict_field": {"chocolate": "pudding"}, "dict_field_with_default_factory": {}}
+                {"id": uuid4(), "dict_f": {"chocolate": "pudding"}, "dict_f_w_default_factory": {}}
         ),
         (
                 generate_entity_cls_params(
                     class_name="EntityWithBoolFields",
                     fields_conf={
                         "id": UUID,
-                        "bool_field": dict,
-                        "bool_field_with_default": (dict, Field(default=True)),
+                        "bool_f": dict,
+                        "bool_f_w_default": (dict, Field(default=True)),
                     },
                     rel_entity_classes_params=[],
                 ),
-                {"id": uuid4(), "bool_field": False, "bool_field_with_default": True}
+                {"id": uuid4(), "bool_f": False, "bool_f_w_default": True}
         ),
     ],
     indirect=True,

@@ -20,7 +20,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
     "entity_cls_params",
     [
         generate_entity_cls_params(
-            class_name="Order_",
+            class_name="Order",
             fields_conf={"id": UUID},
             rel_entity_classes_params=[
                 generate_rel_entity_cls_params(
@@ -32,7 +32,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
         ),
         # Using relation api
         generate_entity_cls_params(
-            class_name="Invoice_",
+            class_name="Invoice",
             fields_conf={"id": UUID},
             rel_entity_classes_params=[
                 generate_rel_entity_cls_params(
