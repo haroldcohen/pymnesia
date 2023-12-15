@@ -1,219 +1,218 @@
 """Provides with unit tests to validate the query with where clause feature.
 """
-from uuid import uuid4
+import random
+from functools import partial
+from uuid import UUID, uuid4
 
 import pytest
 from hamcrest import assert_that, equal_to
 
-from tests.common_utils.entities.order import InMemoryOrder
-from tests.common_utils.entities.product import InMemoryProduct
-from tests.common_utils.fixtures.unit_of_work import *
-from tests.common_utils.fixtures.unit_of_work.expected import *
-from tests.common_utils.fixtures.entities.expected import *
-from tests.common_utils.fixtures.entities.populate import *
-from tests.common_utils.fixtures.transaction import *
 from tests.common_utils.fixtures.misc import *
-from tests.common_utils.fixtures.query.expressions import (
-    where_clause,
-    direction,
-    order_by_key,
-    limit,
-)
+from tests.common_utils.fixtures.unit_of_work import *
+from tests.common_utils.fixtures.transaction import *
+from tests.common_utils.fixtures.entities.make import *
+from tests.common_utils.fixtures.entities.expected import *
+from tests.common_utils.fixtures.entities.seed import *
+from tests.common_utils.fixtures.query.query import *
+from tests.common_utils.fixtures.registry import unregister_entity_classes
+from tests.common_utils.fixtures.query.expressions import where_clause
+from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
+from tests.common_utils.helpers.entities.seeding import generate_seeds
+from pymnesia.entities.field import Field
 
 
-@pytest.mark.parametrize(
-    "entities, where_clause, expected_entity, populate_expected_last",
-    [
-        ([InMemoryOrder(id=uuid4())], {"total_amount": 50}, InMemoryOrder(id=uuid4(), total_amount=50), True),
-    ],
-    indirect=True,
-)
-def test_query_and_fetch_one_with_a_where_clause_should_return_a_single_filtered_entity(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        expected_entity,
-        populate_entities,
-        populate_expected_last,
-):
-    # Act
-    base_query = getattr(unit_of_work.query(), expected_entity.__tablename__)()
-    result = base_query \
-        .where(where_clause) \
-        .fetch_one()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entity)
+class TestQueryWithNumericWhereClause:
+
+    @pytest.fixture(scope="class")
+    def entity_cls_params(self):
+        return generate_entity_cls_params(
+            class_name="NumericEntity",
+            fields_conf={
+                "id": UUID,
+                "int_f": (int, Field(default=0)),
+                "float_f": (float, Field(default=0.1)),
+            },
+            rel_entity_classes_params=[],
+        )
+
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause",
+        [
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": partial(random.randint, 1, 2)}),
+                    generate_seeds(1, ({"id": uuid4, "int_f": 3})),
+                    {"int_f": 3},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": 2}) + generate_seeds(1, {"id": uuid4, "int_f": 3}),
+                    generate_seeds(1, ({"id": uuid4, "int_f": 3})),
+                    {"int_f": 3},
+            ),
+        ],
+        indirect=True,
     )
+    def test_query_and_fetch_one_with_a_where_eq_clause_should_return_a_single_filtered_entity(
+            self,
+            seeds,
+            expected_seeds,
+            expected_entities,
+            seeded_entities,
+            unit_of_work,
+            base_query,
+            where_clause,
+            unregister_entity_classes,
+    ):
+        result = base_query.where(where_clause).fetch_one()
+        assert_that(
+            [result],
+            equal_to(expected_entities)
+        )
 
-
-@pytest.mark.parametrize(
-    "entities, where_clause, expected_entities",
-    [
-        ([InMemoryOrder(id=uuid4())], {"total_amount": 50}, [
-            InMemoryOrder(id=uuid4(), total_amount=50),
-            InMemoryOrder(id=uuid4(), total_amount=50)
-        ]),
-    ],
-    indirect=True,
-)
-def test_query_and_fetch_with_a_where_clause_should_return_a_number_of_filtered_entities(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        expected_entities,
-        populate_entities,
-):
-    # Act
-    base_query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
-    result = base_query \
-        .where(where_clause) \
-        .fetch()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entities)
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause",
+        [
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": 1}),
+                    generate_seeds(3, ({"id": uuid4, "int_f": 2})),
+                    {"int_f": 2},
+            ),
+        ],
+        indirect=True,
     )
+    def test_query_and_fetch_with_a_where_clause_eq_should_return_multiple_filtered_entities(
+            self,
+            seeds,
+            expected_seeds,
+            expected_entities,
+            seeded_entities,
+            unit_of_work,
+            base_query,
+            where_clause,
+            unregister_entity_classes,
+    ):
+        result = base_query.where(where_clause).fetch()
+        assert_that(
+            result,
+            equal_to(expected_entities)
+        )
 
-
-@pytest.mark.parametrize(
-    "entities, where_clause, expected_entities",
-    [
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=50)
-         ], {"total_amount::not": 50}, [InMemoryOrder(id=uuid4(), total_amount=60)]),
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=50)
-         ], {"total_amount::gt": 51}, [InMemoryOrder(id=uuid4(), total_amount=60)]),
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=80)
-         ], {"total_amount::lt": 80}, [InMemoryOrder(id=uuid4(), total_amount=60)]),
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=79)
-         ], {"total_amount::gte": 80}, [
-             InMemoryOrder(id=uuid4(), total_amount=80),
-             InMemoryOrder(id=uuid4(), total_amount=82)
-         ]),
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=81)
-         ], {"total_amount::lte": 80}, [
-             InMemoryOrder(id=uuid4(), total_amount=80),
-             InMemoryOrder(id=uuid4(), total_amount=60)
-         ]),
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=81),
-             InMemoryOrder(id=uuid4(), total_amount=60)
-         ], {"total_amount::lt": 80, "vat_not_included_amount": 60}, [
-             InMemoryOrder(id=uuid4(), total_amount=79, vat_not_included_amount=60),
-         ]),
-        ([
-             InMemoryProduct(id=uuid4()),
-             InMemoryProduct(id=uuid4())
-         ], {"name::match": r'^Framework laptop \d+ inches$'}, [
-             InMemoryProduct(id=uuid4(), name="Framework laptop 16 inches"),
-             InMemoryProduct(id=uuid4(), name="Framework laptop 13 inches"),
-         ]),
-        ([
-             InMemoryProduct(id=uuid4())
-         ], {"name::in": ["iPhone 14", "Galaxy 13"]}, [
-             InMemoryProduct(id=uuid4(), name="iPhone 14"),
-             InMemoryProduct(id=uuid4(), name="Galaxy 13")
-         ]),
-    ],
-    indirect=True,
-)
-def test_query_and_fetch_with_a_where_clause_different_from_equal_should_return_a_number_of_filtered_entities(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        expected_entities,
-        populate_entities,
-):
-    # Act
-    base_query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
-    result = base_query \
-        .where(where_clause) \
-        .fetch()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entities)
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause",
+        [
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": 1}),
+                    generate_seeds(3, ({"id": uuid4, "int_f": 2})),
+                    {"int_f": 2},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": 1}),
+                    generate_seeds(1, ({"id": uuid4, "int_f": partial(random.randint, 2, 3)})),
+                    {"int_f::not": 1},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": 2}),
+                    generate_seeds(2, ({"id": uuid4, "int_f": partial(random.randint, 3, 5)})),
+                    {"int_f::gt": 2},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": partial(random.randint, 3, 5)}),
+                    generate_seeds(3, ({"id": uuid4, "int_f": partial(random.randint, 1, 2)})),
+                    {"int_f::lt": 3},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": 2}),
+                    generate_seeds(1, ({"id": uuid4, "int_f": partial(random.randint, 3, 5)})),
+                    {"int_f::gte": 3},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": partial(random.randint, 3, 5)}),
+                    generate_seeds(2, ({"id": uuid4, "int_f": partial(random.randint, 1, 2)})),
+                    {"int_f::lte": 2},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "int_f": partial(random.randint, 3, 5)}),
+                    generate_seeds(3, ({"id": uuid4, "int_f": partial(random.randint, 7, 10)})),
+                    {"int_f::in": [7, 8, 9, 10]},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "float_f": 2.1}),
+                    generate_seeds(1, ({"id": uuid4, "float_f": 2.2})) +
+                    generate_seeds(1, ({"id": uuid4, "float_f": 2.3})),
+                    {"float_f::in": [2.2, 2.3]},
+            ),
+        ],
+        indirect=True,
     )
+    def test_query_and_fetch_with_a_where_clause_should_return_one_or_more_filtered_entities(
+            self,
+            entity_cls_params,
+            entity_cls,
+            seeds,
+            expected_seeds,
+            expected_entities,
+            seeded_entities,
+            unit_of_work,
+            unregister_entity_classes,
+            base_query,
+            where_clause,
+    ):
+        result = base_query.where(where_clause).fetch()
+        assert_that(
+            result,
+            equal_to(expected_entities)
+        )
 
 
-@pytest.mark.parametrize(
-    "entities, where_clause, expected_entities, direction, order_by_key",
-    [
-        ([
-             InMemoryProduct(id=uuid4()),
-             InMemoryProduct(id=uuid4())
-         ], {"name::match": r'^Framework laptop \d+ inches$'}, [
-             InMemoryProduct(id=uuid4(), name="Framework laptop 16 inches"),
-             InMemoryProduct(id=uuid4(), name="Framework laptop 13 inches"),
-         ], "asc", "name"),
-    ],
-    indirect=True,
-)
-def test_query_and_fetch_with_a_where_clause_and_order_by_should_return_a_number_of_filtered_ordered_entities(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        expected_entities,
-        populate_entities,
-        direction,
-        order_by_key,
-):
-    # Act
-    sorted_entities = sorted(expected_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
-    base_query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
-    result = base_query \
-        .where(where_clause) \
-        .order_by(direction, order_by_key) \
-        .fetch()
-    # Assert
-    assert_that(
-        result,
-        equal_to(sorted_entities)
+class TestQueryWithStrWhereClause:
+
+    @pytest.fixture(scope="class")
+    def entity_cls_params(self):
+        return generate_entity_cls_params(
+            class_name="StrEntity",
+            fields_conf={
+                "id": UUID,
+                "str_f": str,
+            },
+            rel_entity_classes_params=[],
+        )
+
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause",
+        [
+            (
+                    generate_seeds(2, {"id": uuid4, "str_f": "apple"}),
+                    generate_seeds(1, ({"id": uuid4, "str_f": "banana"})),
+                    {"str_f": "banana"},
+            ),
+            (
+                    generate_seeds(2, {"id": uuid4, "str_f": "banana"}),
+                    generate_seeds(2, ({"id": uuid4, "str_f": "apple"})),
+                    {"str_f::not": "banana"},
+            ),
+            (
+                    generate_seeds(3, {"id": uuid4, "str_f": "carrots are vegetables !"}),
+                    generate_seeds(1, ({"id": uuid4, "str_f": "apples are fruits !"})) +
+                    generate_seeds(1, ({"id": uuid4, "str_f": "bananas are fruits !"})),
+                    {"str_f::match": r'^\w+ are fruits !$'},
+            ),
+        ],
+        indirect=True,
     )
-
-
-@pytest.mark.parametrize(
-    "entities, where_clause, expected_entities, limit",
-    [
-        ([
-             InMemoryOrder(id=uuid4(), total_amount=50),
-             InMemoryOrder(id=uuid4(), total_amount=64),
-             InMemoryOrder(id=uuid4(), total_amount=65),
-         ], {"total_amount::not": 50}, [
-             InMemoryOrder(id=uuid4(), total_amount=60),
-             InMemoryOrder(id=uuid4(), total_amount=61),
-             InMemoryOrder(id=uuid4(), total_amount=63),
-         ], 3),
-    ],
-    indirect=True,
-)
-def test_query_and_fetch_with_a_where_clause_and_limit_should_return_a_limited_number_of_filtered_entities(
-        unit_of_work,
-        transaction,
-        entities,
-        where_clause,
-        expected_entities,
-        populate_entities,
-        limit,
-):
-    # Act
-    base_query = getattr(unit_of_work.query(), expected_entities[0].__tablename__)()
-    result = base_query \
-        .where(where_clause) \
-        .limit(limit) \
-        .fetch()
-    # Assert
-    assert_that(
-        result,
-        equal_to(expected_entities)
-    )
+    def test_query_and_fetch_with_a_where_clause_should_return_one_or_more_filtered_entities(
+            self,
+            entity_cls_params,
+            entity_cls,
+            seeds,
+            expected_seeds,
+            expected_entities,
+            seeded_entities,
+            unit_of_work,
+            unregister_entity_classes,
+            base_query,
+            where_clause,
+    ):
+        result = base_query.where(where_clause).fetch()
+        assert_that(
+            result,
+            equal_to(expected_entities)
+        )

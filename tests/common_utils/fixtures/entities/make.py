@@ -20,12 +20,12 @@ __all__ = [
 ]
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def entity_cls_params(request):
     return request.param
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def fields_conf(entity_cls_params: EntityClsParams, rel_entity_classes):  # pylint: disable=unused-argument
     for related_entity_class_params in entity_cls_params.rel_entity_classes_params:
         if related_entity_class_params.relation_type == "one_to_one":
@@ -50,7 +50,7 @@ def fields_conf(entity_cls_params: EntityClsParams, rel_entity_classes):  # pyli
     return entity_cls_params.fields_conf
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def entity_cls(entity_cls_params: EntityClsParams, rel_entity_classes):  # pylint: disable=unused-argument
     """Returns a dynamically made entity class resolver.
 
@@ -83,7 +83,7 @@ def entity_cls(entity_cls_params: EntityClsParams, rel_entity_classes):  # pylin
     return entity_cls_
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def rel_entity_classes(entity_cls_params: EntityClsParams):
     entity_classes = []
 
@@ -99,7 +99,7 @@ def rel_entity_classes(entity_cls_params: EntityClsParams):
     return entity_classes
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def owned_relations(
         entity_cls,  # pylint: disable=unused-argument
         entity_cls_params,
