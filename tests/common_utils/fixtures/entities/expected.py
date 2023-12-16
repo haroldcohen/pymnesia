@@ -5,6 +5,7 @@ import pytest
 __all__ = [
     "use_properties",
     "expected_entities",
+    "use_properties_for_rel_entities",
 ]
 
 
@@ -17,6 +18,13 @@ def use_properties(request):  # pylint: disable=redefined-outer-name
     :param request: The parametrized fixture.
     :return: A dictionary of values to be used or an empty dictionary.
     """
+    if hasattr(request, "param"):
+        return request.param
+    return {}
+
+
+@pytest.fixture()
+def use_properties_for_rel_entities(request):
     if hasattr(request, "param"):
         return request.param
     return {}

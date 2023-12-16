@@ -78,6 +78,14 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
 
         return memento
 
+    def restore(self, memento: UnitOfWorkMemento):
+        """Restores the unit of work to a previous state.
+
+        :param memento: The memento to use for restoration.
+        :return: None
+        """
+        self.__replica = memento
+
     def query(self):
         """Returns a query engine to be used for querying the unit of work current state.
 
