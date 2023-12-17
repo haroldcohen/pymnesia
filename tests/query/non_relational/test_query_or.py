@@ -78,3 +78,35 @@ class TestQueryWithWhereOrClause:
             result,
             equal_to(expected_entities)
         )
+
+    @pytest.mark.parametrize(
+        "seeds, expected_seeds, where_clause, or_clauses",
+        [
+            (
+                    generate_seeds(1, {"id": uuid4, "int_f": 50}),
+                    generate_seeds(1, ({"id": uuid4, "int_f": 60})),
+                    {"int_f": 60}, [{"int_f": 60}]
+            ),
+        ],
+        indirect=True,
+    )
+    def test_query_and_fetch_with_a_where_or_clause_should_not_return_duplicates(
+            self,
+            seeds,
+            expected_seeds,
+            expected_entities,
+            seeded_entities,
+            unit_of_work,
+            base_query,
+            where_clause,
+            or_clauses,
+            unregister_entity_classes,
+    ):
+        query = base_query.where(where_clause)
+        for or_clause in or_clauses:
+            query.or_(or_clause)
+        result = query.fetch()
+        assert_that(
+            result,
+            equal_to(expected_entities)
+        )
