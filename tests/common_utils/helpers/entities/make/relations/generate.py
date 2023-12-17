@@ -2,7 +2,7 @@
 """
 import re
 
-from pymnesia.entities.relations import Relation
+from pymnesia.core.entities.relations import Relation
 from tests.common_utils.helpers.entities.make.relations.types import RelatedEntityClsParams
 from tests.common_utils.helpers.types import FieldsConf
 

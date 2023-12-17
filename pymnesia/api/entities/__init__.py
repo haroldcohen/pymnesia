@@ -1,6 +1,6 @@
 """Provides with entities related api functions.
 """
-from pymnesia.entities.relations import Relation
+from pymnesia.core.entities.relations import Relation
 
 
 def relation(reverse: str, is_nullable: bool = True) -> Relation:

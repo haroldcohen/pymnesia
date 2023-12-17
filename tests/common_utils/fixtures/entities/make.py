@@ -5,8 +5,8 @@ from typing import List
 import pytest
 
 from pymnesia.api.entities import relation
-from pymnesia.entities.relations import Relation
-from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.relations import Relation
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
 from tests.common_utils.helpers.entities.make.types import EntityClsParams
 from tests.common_utils.helpers.entities.make.make import make_entity_class
 from tests.common_utils.helpers.types import FieldsConf

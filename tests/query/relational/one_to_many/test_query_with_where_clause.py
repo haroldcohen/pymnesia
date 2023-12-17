@@ -19,7 +19,7 @@ from tests.common_utils.fixtures.query.expressions import where_clause, or_claus
 from tests.common_utils.helpers.entities.make.relations.generate import generate_rel_entity_cls_params
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.entities.seeding import generate_seeds, generate_seed, generate_rel_seeds
-from pymnesia.entities.field import Field
+from pymnesia.core.entities.field import Field
 
 
 class TestOneToManyRelationalQueryWithNumericWhereClause:

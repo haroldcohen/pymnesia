@@ -7,10 +7,10 @@ import pytest
 
 __all__ = ["expected_unit_of_work_memento"]
 
-from pymnesia.entities.entity import Entity
-from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
-from pymnesia.entities.registry import registry
-from pymnesia.unit_of_work.memento.meta import unit_of_work_metaclass
+from pymnesia.core.entities.entity import Entity
+from pymnesia.core.unit_of_work.memento.base import UnitOfWorkMemento
+from pymnesia.core.entities.registry import registry
+from pymnesia.core.unit_of_work.memento.meta import unit_of_work_metaclass
 
 
 @pytest.fixture()

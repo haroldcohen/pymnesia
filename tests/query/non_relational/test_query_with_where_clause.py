@@ -18,7 +18,7 @@ from tests.common_utils.fixtures.registry import unregister_entity_classes
 from tests.common_utils.fixtures.query.expressions import where_clause
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.entities.seeding import generate_seeds
-from pymnesia.entities.field import Field
+from pymnesia.core.entities.field import Field
 
 
 class TestQueryWithNumericWhereClause:

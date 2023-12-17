@@ -4,8 +4,8 @@ from dataclasses import make_dataclass, field
 from typing import Dict
 from uuid import UUID
 
-from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
-from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
+from pymnesia.core.entities.registry.interface import PymnesiaRegistryInterface
+from pymnesia.core.unit_of_work.memento.base import UnitOfWorkMemento
 
 __all__ = [
     "UnitOfWorkMementoMeta",

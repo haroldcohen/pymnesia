@@ -5,9 +5,9 @@ from uuid import UUID
 import pytest
 from hamcrest import assert_that, equal_to
 
-from pymnesia.entities.base import DeclarativeBase
-from pymnesia.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
-from pymnesia.entities.registry.exceptions.missing_tablename import MissingTablenameException
+from pymnesia.core.entities.base import DeclarativeBase
+from pymnesia.core.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
+from pymnesia.core.entities.registry.exceptions.missing_tablename import MissingTablenameException
 
 
 def test_register_entity_without_a_primary_key_should_raise_MissingPrimaryKeyException():

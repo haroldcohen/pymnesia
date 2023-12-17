@@ -2,8 +2,8 @@
 """
 import pytest
 
-from pymnesia.transaction.transaction import InMemoryTransaction
-from pymnesia.unit_of_work.unit_of_work import UnitOfWork
+from pymnesia.core.transaction.transaction import InMemoryTransaction
+from pymnesia.core.unit_of_work.unit_of_work import UnitOfWork
 
 __all__ = ["transaction"]
 

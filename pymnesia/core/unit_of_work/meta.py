@@ -1,7 +1,7 @@
 """Provides with a metaclass for UnitOfWork.
 """
-from pymnesia.common.originator_interface import OriginatorInterface
-from pymnesia.entities.registry import registry
+from pymnesia.core.common.originator_interface import OriginatorInterface
+from pymnesia.core.entities.registry import registry
 
 
 class UnitOfWorkMeta(type(OriginatorInterface)):

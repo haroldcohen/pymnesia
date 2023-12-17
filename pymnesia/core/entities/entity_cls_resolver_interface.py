@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Type
 
-from pymnesia.entities.entity import Entity
+from pymnesia.core.entities.entity import Entity
 
 
 class EntityClassResolverInterface(ABC):

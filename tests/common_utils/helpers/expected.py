@@ -4,12 +4,12 @@ from dataclasses import MISSING
 from typing import Dict, List, get_origin, get_args, Tuple
 from uuid import UUID
 
-from pymnesia.entities.entity import Entity
-from pymnesia.entities.entity_cls_conf import EntityClsConf
-from pymnesia.entities.entity_resolver import EntityClassResolver
-from pymnesia.entities.field import UNDEFINED
-from pymnesia.entities.meta import empty_list_factory
-from pymnesia.entities.relations import Relation
+from pymnesia.core.entities.entity import Entity
+from pymnesia.core.entities.entity_cls_conf import EntityClsConf
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.field import UNDEFINED
+from pymnesia.core.entities.meta import empty_list_factory
+from pymnesia.core.entities.relations import Relation
 from tests.common_utils.helpers.entities.make.make import is_relation_field_conf, is_type_and_field_tuple
 from tests.common_utils.helpers.types import FieldsConf
 

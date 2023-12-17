@@ -5,9 +5,9 @@ from typing import Dict, List
 
 from hamcrest import assert_that, equal_to
 
-from pymnesia.entities.entity_cls_conf import EntityClsConf
-from pymnesia.entities.entity_resolver import EntityClassResolver
-from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
+from pymnesia.core.entities.entity_cls_conf import EntityClsConf
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.registry.interface import PymnesiaRegistryInterface
 from tests.common_utils.helpers.hamcrest.iterable_contains import iterable_contains
 from tests.common_utils.helpers.extract import extract_entity_class_fields
 

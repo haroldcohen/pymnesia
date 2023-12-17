@@ -2,7 +2,7 @@ import datetime
 import re
 from typing import Union, Any, Iterable
 
-from pymnesia.query.filter.registry import register_filter_func
+from pymnesia.core.query.filter.registry import register_filter_func
 
 __all__ = ["filter_eq", "filter_not", "filter_greater_than", "filter_greater_than_or_equal", "filter_less_than",
            "filter_less_than_or_equal", "filter_match", "filter_in"]

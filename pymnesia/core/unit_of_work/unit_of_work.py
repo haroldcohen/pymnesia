@@ -3,12 +3,12 @@
 import time
 from copy import deepcopy
 
-from pymnesia.common.originator_interface import OriginatorInterface
-from pymnesia.query.engine.meta import query_engine_metaclass
-from pymnesia.unit_of_work.memento.meta import unit_of_work_metaclass
-from pymnesia.unit_of_work.meta import UnitOfWorkMeta
-from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
-from pymnesia.entities.registry import registry
+from pymnesia.core.common.originator_interface import OriginatorInterface
+from pymnesia.core.query.engine.meta import query_engine_metaclass
+from pymnesia.core.unit_of_work.memento.meta import unit_of_work_metaclass
+from pymnesia.core.unit_of_work.meta import UnitOfWorkMeta
+from pymnesia.core.unit_of_work.memento.base import UnitOfWorkMemento
+from pymnesia.core.entities.registry import registry
 
 __all__ = ["UnitOfWork"]
 

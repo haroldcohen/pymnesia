@@ -3,8 +3,8 @@
 from typing import Optional, List
 from dataclasses import dataclass
 
-from pymnesia.entities.entity_resolver import EntityClassResolver
-from pymnesia.entities.relations import Relation
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.relations import Relation
 from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = ["RelatedEntityClassesParams", "RelatedEntityClsParams"]

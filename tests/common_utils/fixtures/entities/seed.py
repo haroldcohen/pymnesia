@@ -4,7 +4,7 @@ from typing import List, Dict
 
 import pytest
 
-from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
 from tests.common_utils.helpers.entities.seeding import generate_entities
 from tests.common_utils.helpers.entities.seeding import water_seeds
 

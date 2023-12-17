@@ -25,7 +25,7 @@ from tests.common_utils.fixtures.query.expressions import (
     direction,
     order_by_key,
 )
-from pymnesia.entities.field import Field
+from pymnesia.core.entities.field import Field
 
 
 class TestQueryOrderByNumericField:

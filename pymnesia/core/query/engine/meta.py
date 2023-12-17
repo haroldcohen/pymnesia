@@ -1,8 +1,8 @@
 """Provides with a metaclass for QueryEngine.
 """
-from pymnesia.query.engine.base import QueryEngine
-from pymnesia.query.query import Query
-from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
+from pymnesia.core.query.engine.base import QueryEngine
+from pymnesia.core.query.query import Query
+from pymnesia.core.entities.registry.interface import PymnesiaRegistryInterface
 
 __all__ = [
     "QueryEngineType",
