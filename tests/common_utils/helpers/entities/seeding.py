@@ -2,7 +2,7 @@
 """
 from typing import Callable, Dict, List, Union, Any
 
-from pymnesia.entities.entity import Entity
+from pymnesia.core.entities.entity import Entity
 
 __all__ = [
     "generate_seeds",

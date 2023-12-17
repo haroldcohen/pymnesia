@@ -2,7 +2,7 @@
 """
 import pytest
 
-from pymnesia.entities.registry import registry
+from pymnesia.core.entities.registry import registry
 
 _all__ = [
     "unregister_entity_classes",

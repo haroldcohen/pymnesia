@@ -10,8 +10,8 @@ from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.registry import unregister_entity_classes
-from pymnesia.entities.registry import registry
-from pymnesia.entities.field import Field
+from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.field import Field
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.validate import validate_entity_cls
 

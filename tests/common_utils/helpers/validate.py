@@ -2,8 +2,8 @@
 """
 from typing import List
 
-from pymnesia.entities.entity_resolver import EntityClassResolver
-from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.registry.interface import PymnesiaRegistryInterface
 from tests.common_utils.helpers.assert_that import (
     assert_that_entity_cls_conf_equal_to_expected,
     assert_that_entity_cls_attributes_equal_to_expected,

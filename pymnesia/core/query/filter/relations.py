@@ -1,8 +1,8 @@
 from typing import Any, Iterable
 from itertools import groupby
 
-from pymnesia.entities.relations import Relation
-from pymnesia.query.filter.registry import register_filter_func
+from pymnesia.core.entities.relations import Relation
+from pymnesia.core.query.filter.registry import register_filter_func
 
 __all__ = ["filter_rel_eq"]
 

@@ -2,9 +2,9 @@
 """
 from typing import Type
 
-from pymnesia.entities.entity import Entity
-from pymnesia.entities.registry.interface import PymnesiaRegistryInterface
-from pymnesia.entities.entity_cls_resolver_interface import EntityClassResolverInterface
+from pymnesia.core.entities.entity import Entity
+from pymnesia.core.entities.registry.interface import PymnesiaRegistryInterface
+from pymnesia.core.entities.entity_cls_resolver_interface import EntityClassResolverInterface
 
 
 class EntityClassResolver(EntityClassResolverInterface):

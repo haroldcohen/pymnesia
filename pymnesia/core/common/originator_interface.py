@@ -1,7 +1,7 @@
 """Provides with an interface for """
 from abc import ABC, abstractmethod
 
-from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
+from pymnesia.core.unit_of_work.memento.base import UnitOfWorkMemento
 
 
 class OriginatorInterface(ABC):

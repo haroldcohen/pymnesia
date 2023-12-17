@@ -2,8 +2,8 @@
 """
 from typing import Dict, Union, Tuple
 
-from pymnesia.entities.field import Field
-from pymnesia.entities.relations import Relation
+from pymnesia.core.entities.field import Field
+from pymnesia.core.entities.relations import Relation
 
 __all__ = ["FieldConf", "FieldsConf"]
 

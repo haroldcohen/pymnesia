@@ -2,8 +2,8 @@
 """
 from typing import Generator, List
 
-from pymnesia.common.originator_interface import OriginatorInterface
-from pymnesia.unit_of_work.memento.base import UnitOfWorkMemento
+from pymnesia.core.common.originator_interface import OriginatorInterface
+from pymnesia.core.unit_of_work.memento.base import UnitOfWorkMemento
 
 __all__ = [
     "InMemoryTransaction",

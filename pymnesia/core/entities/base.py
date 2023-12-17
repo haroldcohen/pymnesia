@@ -1,6 +1,6 @@
 """Provides with a base class for entities.
 """
-from pymnesia.entities.meta import EntityMeta
+from pymnesia.core.entities.meta import EntityMeta
 
 
 class DeclarativeBase(metaclass=EntityMeta):

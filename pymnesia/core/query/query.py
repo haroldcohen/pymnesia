@@ -3,12 +3,12 @@
 import re
 from typing import Callable
 
-from pymnesia.composition import runner
-from pymnesia.query.filter.registry import find_filter_function
-from pymnesia.query.functions import order_by
-from pymnesia.query.runner import QueryRunner
-from pymnesia.query.filter.functions import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from pymnesia.query.filter.relations import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from pymnesia.core.composition import runner
+from pymnesia.core.query.filter.registry import find_filter_function
+from pymnesia.core.query.functions import order_by
+from pymnesia.core.query.runner import QueryRunner
+from pymnesia.core.query.filter.functions import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from pymnesia.core.query.filter.relations import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 FIELD_OPERATOR_REGEX = re.compile(r'^(?P<field>\w+)::(?P<operator>\w+)$')
 RELATION_PROPERTY_REGEX = re.compile(r'^(?P<rel>\w+)\.(?P<rel_property>.*)$')

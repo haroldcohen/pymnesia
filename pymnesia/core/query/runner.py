@@ -1,7 +1,7 @@
 """Provides with QueryRunner.
 """
-from pymnesia.composition import composite
-from pymnesia.entities.entity import Entity
+from pymnesia.core.composition import composite
+from pymnesia.core.entities.entity import Entity
 
 
 class QueryRunner:

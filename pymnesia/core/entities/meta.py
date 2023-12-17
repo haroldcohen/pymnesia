@@ -4,14 +4,14 @@ from dataclasses import make_dataclass, field, fields as dataclass_fields, MISSI
 from typing import List, Type, Tuple, Dict, Union, get_origin, get_args, Any
 from uuid import UUID
 
-from pymnesia.entities.entity_cls_conf import EntityClsConf
-from pymnesia.entities.field import UNDEFINED, Field
-from pymnesia.entities.entity import Entity
-from pymnesia.entities.registry import registry
-from pymnesia.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
-from pymnesia.entities.registry.exceptions.missing_tablename import MissingTablenameException
-from pymnesia.entities.relations import Relation
-from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.entity_cls_conf import EntityClsConf
+from pymnesia.core.entities.field import UNDEFINED, Field
+from pymnesia.core.entities.entity import Entity
+from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
+from pymnesia.core.entities.registry.exceptions.missing_tablename import MissingTablenameException
+from pymnesia.core.entities.relations import Relation
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
 
 
 class EntityMeta(type):

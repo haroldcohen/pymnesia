@@ -2,7 +2,7 @@
 """
 import pytest
 
-from pymnesia.unit_of_work.unit_of_work import UnitOfWork
+from pymnesia.core.unit_of_work.unit_of_work import UnitOfWork
 
 __all__ = ["unit_of_work"]
 

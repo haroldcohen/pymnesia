@@ -3,11 +3,11 @@
 from dataclasses import MISSING
 from typing import Any, get_origin, get_args
 
-from pymnesia.entities.entity import Entity
-from pymnesia.entities.field import Field, UNDEFINED
-from pymnesia.entities.relations import Relation
-from pymnesia.entities.base import DeclarativeBase
-from pymnesia.entities.meta import EntityMeta
+from pymnesia.core.entities.entity import Entity
+from pymnesia.core.entities.field import Field, UNDEFINED
+from pymnesia.core.entities.relations import Relation
+from pymnesia.core.entities.base import DeclarativeBase
+from pymnesia.core.entities.meta import EntityMeta
 from tests.common_utils.helpers.types import FieldsConf
 
 __all__ = [

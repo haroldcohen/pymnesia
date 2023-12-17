@@ -3,7 +3,7 @@
 from typing import Optional
 from dataclasses import dataclass
 
-from pymnesia.entities.entity_resolver import EntityClassResolver
+from pymnesia.core.entities.entity_resolver import EntityClassResolver
 from tests.common_utils.helpers.entities.make.relations.types import RelatedEntityClassesParams
 from tests.common_utils.helpers.types import FieldsConf
 

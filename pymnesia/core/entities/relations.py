@@ -2,7 +2,7 @@
 """
 from dataclasses import dataclass, field
 
-from pymnesia.entities.entity_cls_resolver_interface import EntityClassResolverInterface
+from pymnesia.core.entities.entity_cls_resolver_interface import EntityClassResolverInterface
 
 
 @dataclass()
