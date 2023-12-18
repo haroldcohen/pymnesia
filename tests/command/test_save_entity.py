@@ -57,6 +57,7 @@ class TestSaveAndCommit:
         # Act
         for expected_entity in expected_entities:
             unit_of_work.save_entity(expected_entity)
+            expected_unit_of_work_memento.state += 1
         transaction.commit()
 
         # Assert

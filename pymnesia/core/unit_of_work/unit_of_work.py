@@ -52,6 +52,11 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
         table = getattr(self.__replica, entity.__tablename__)
         table[entity.id] = entity
 
+    def delete_entity(self, entity):
+        self.__replica.state = time.time_ns()
+        table = getattr(self.__replica, entity.__tablename__)
+        table.pop(entity.id)
+
     def save(self) -> UnitOfWorkMemento:
         """Saves the unit of work replica's current state.
         Used by the caretaker to commit.
