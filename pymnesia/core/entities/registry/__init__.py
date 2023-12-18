@@ -2,4 +2,4 @@
 """
 from pymnesia.core.entities.registry.registry import PymnesiaRegistry
 
-registry = PymnesiaRegistry()
+DEFAULT_E_CLASSES_REGISTRY = PymnesiaRegistry()

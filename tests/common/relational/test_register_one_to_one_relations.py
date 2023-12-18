@@ -9,7 +9,7 @@ from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.misc import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.registry import *
-from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.registry import DEFAULT_E_CLASSES_REGISTRY
 from pymnesia.core.entities.relations import Relation
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.entities.make.relations.generate import generate_rel_entity_cls_params
@@ -54,7 +54,7 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
         entity_cls_resolver=entity_cls,
         fields_conf=entity_cls_params.fields_conf,
         owned_relations=owned_relations,
-        registry=registry,
+        registry=DEFAULT_E_CLASSES_REGISTRY,
     )
     assert_that(
         getattr(unit_of_work, entity_cls_params.table_name),
@@ -65,7 +65,7 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
             entity_cls_resolver=rel_entity_cls_params.cls_resolver,
             fields_conf=rel_entity_cls_params.fields_conf,
             owned_relations=[],
-            registry=registry,
+            registry=DEFAULT_E_CLASSES_REGISTRY,
         )
         assert_that(
             getattr(unit_of_work, rel_entity_cls_params.table_name),

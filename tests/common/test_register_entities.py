@@ -11,7 +11,7 @@ from tests.common_utils.fixtures.unit_of_work import *
 from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.registry import unregister_entity_classes
-from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.registry import DEFAULT_E_CLASSES_REGISTRY
 from pymnesia.api.entities.fields import field
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.validate import validate_entity_cls
@@ -112,7 +112,7 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
         entity_cls_resolver=entity_cls,
         fields_conf=entity_cls_params.fields_conf,
         owned_relations=owned_relations,
-        registry=registry,
+        registry=DEFAULT_E_CLASSES_REGISTRY,
     )
     properties_without_defaults = {}
     for prop_name, prop_value in use_properties.items():

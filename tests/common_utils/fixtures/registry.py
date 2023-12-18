@@ -2,7 +2,7 @@
 """
 import pytest
 
-from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.registry import DEFAULT_E_CLASSES_REGISTRY
 
 _all__ = [
     "unregister_entity_classes",
@@ -21,5 +21,5 @@ def unregister_entity_classes(
     """
     yield None
     for entity_cls_ in rel_entity_classes:
-        registry.unregister(entity_cls_)
-    registry.unregister(entity_cls)
+        DEFAULT_E_CLASSES_REGISTRY.unregister(entity_cls_)
+    DEFAULT_E_CLASSES_REGISTRY.unregister(entity_cls)

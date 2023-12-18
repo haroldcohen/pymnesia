@@ -7,7 +7,7 @@ from uuid import UUID
 from pymnesia.core.entities.entity_cls_conf import EntityClsConf
 from pymnesia.core.entities.field import UNDEFINED, Field
 from pymnesia.core.entities.entity import Entity
-from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.registry import DEFAULT_E_CLASSES_REGISTRY
 from pymnesia.core.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
 from pymnesia.core.entities.registry.exceptions.missing_tablename import MissingTablenameException
 from pymnesia.core.entities.relations import Relation
@@ -89,7 +89,7 @@ class EntityMeta(type):
                         field_type
                     ))
 
-        cls_resolver = registry.register(
+        cls_resolver = DEFAULT_E_CLASSES_REGISTRY.register(
             _make_entity_dataclass(
                 name=name,
                 tablename=tablename,
