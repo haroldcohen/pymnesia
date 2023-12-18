@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-from pymnesia.api.entities import relation
+from pymnesia.api.entities.fields import relation
 from pymnesia.core.entities.relations import Relation
 from pymnesia.core.entities.entity_resolver import EntityClassResolver
 from tests.common_utils.helpers.entities.make.types import EntityClsParams
