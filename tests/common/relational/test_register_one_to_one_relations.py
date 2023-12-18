@@ -1,6 +1,6 @@
 """Provides with unit tests to validate 'one to one' relationships feature.
 """
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from hamcrest import assert_that, equal_to
 
@@ -48,7 +48,7 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
         unit_of_work,
 ):
     # WARNING !!!
-    # Need to check: non nullable relation, instance from expected instance, dataclass
+    # Need to check: instance from expected instance, dataclass
     # Assert
     validate_entity_cls(
         entity_cls_resolver=entity_cls,
@@ -71,3 +71,41 @@ def test_register_entity_with_one_to_one_relations_should_update_the_registry_wi
             getattr(unit_of_work, rel_entity_cls_params.table_name),
             equal_to({})
         )
+
+
+@pytest.mark.parametrize(
+    "entity_cls_params",
+    [
+        generate_entity_cls_params(
+            class_name="Order",
+            fields_conf={"id": UUID},
+            rel_entity_classes_params=[
+                generate_rel_entity_cls_params(
+                    class_name="PackagingOption",
+                    fields_conf={"id": UUID},
+                    owner_rel_api=Relation(reverse="order_entity", is_nullable=False)
+                )
+            ]
+        ),
+    ],
+    indirect=True,
+)
+def test_register_entity_with_non_nullable_one_to_one_relations_should_update_the_registry_with_matching_relations(
+        entity_cls_params,
+        fields_conf,
+        entity_cls,
+        rel_entity_classes,
+        unregister_entity_classes,
+        owned_relations,
+        unit_of_work,
+):
+    # Assert
+    validate_entity_cls(
+        entity_cls_resolver=entity_cls,
+        fields_conf=entity_cls_params.fields_conf,
+        owned_relations=owned_relations,
+        registry=DEFAULT_E_CLASSES_REGISTRY,
+    )
+    with pytest.raises(TypeError):
+        entity_cls(id=uuid4())
+
