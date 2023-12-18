@@ -1,5 +1,6 @@
 """Provides with unit tests to validate entities registry related features.
 """
+import re
 from uuid import UUID, uuid4
 
 import pytest
@@ -11,7 +12,7 @@ from tests.common_utils.fixtures.entities.make import *
 from tests.common_utils.fixtures.entities.expected import *
 from tests.common_utils.fixtures.registry import unregister_entity_classes
 from pymnesia.core.entities.registry import registry
-from pymnesia.core.entities.field import Field
+from pymnesia.api.entities.fields import field
 from tests.common_utils.helpers.entities.make.generate import generate_entity_cls_params
 from tests.common_utils.helpers.validate import validate_entity_cls
 
@@ -25,7 +26,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     fields_conf={
                         "id": UUID,
                         "float_f": float,
-                        "float_f_w_default": (float, Field(default=5.5)),
+                        "float_f_w_default": (float, field(default=5.5)),
                     },
                     rel_entity_classes_params=[],
                 ),
@@ -37,7 +38,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     fields_conf={
                         "id": UUID,
                         "int_f": int,
-                        "int_f_w_default": (int, Field(default=1)),
+                        "int_f_w_default": (int, field(default=1)),
                     },
                     rel_entity_classes_params=[],
                 ),
@@ -49,7 +50,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     fields_conf={
                         "id": UUID,
                         "str_f": dict,
-                        "str_f_w_default": (dict, Field(default="Chocolate pudding !")),
+                        "str_f_w_default": (dict, field(default="Chocolate pudding !")),
                     },
                     rel_entity_classes_params=[],
                 ),
@@ -61,8 +62,8 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     fields_conf={
                         "id": UUID,
                         "tuple_f": tuple,
-                        "tuple_f_w_default": (tuple, Field(default=("a", "b"))),
-                        "tuple_f_w_default_factory": (tuple, Field(default_factory=lambda: ())),
+                        "tuple_f_w_default": (tuple, field(default=("a", "b"))),
+                        "tuple_f_w_default_factory": (tuple, field(default_factory=lambda: ())),
                     },
                     rel_entity_classes_params=[],
                 ),
@@ -74,7 +75,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     fields_conf={
                         "id": UUID,
                         "dict_f": dict,
-                        "dict_f_w_default_factory": (dict, Field(default_factory=lambda: {})),
+                        "dict_f_w_default_factory": (dict, field(default_factory=lambda: {})),
                     },
                     rel_entity_classes_params=[],
                 ),
@@ -86,7 +87,7 @@ from tests.common_utils.helpers.validate import validate_entity_cls
                     fields_conf={
                         "id": UUID,
                         "bool_f": dict,
-                        "bool_f_w_default": (dict, Field(default=True)),
+                        "bool_f_w_default": (dict, field(default=True)),
                     },
                     rel_entity_classes_params=[],
                 ),
@@ -113,7 +114,14 @@ def test_register_entity_should_update_the_registry_with_a_prepared_entity_class
         owned_relations=owned_relations,
         registry=registry,
     )
-    entity_cls(**use_properties)
+    properties_without_defaults = {}
+    for prop_name, prop_value in use_properties.items():
+        if not re.match(r'^.*_w_default.*$', prop_name):
+            properties_without_defaults[prop_name] = prop_value
+    assert_that(
+        entity_cls(**use_properties),
+        equal_to(entity_cls(**properties_without_defaults))
+    )
     assert_that(
         getattr(unit_of_work, entity_cls_params.table_name),
         equal_to({})
