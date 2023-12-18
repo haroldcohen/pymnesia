@@ -8,7 +8,7 @@ from pymnesia.core.query.engine.meta import query_engine_metaclass
 from pymnesia.core.unit_of_work.memento.meta import unit_of_work_metaclass
 from pymnesia.core.unit_of_work.meta import UnitOfWorkMeta
 from pymnesia.core.unit_of_work.memento.base import UnitOfWorkMemento
-from pymnesia.core.entities.registry import registry
+from pymnesia.core.entities.registry import DEFAULT_E_CLASSES_REGISTRY
 
 __all__ = ["UnitOfWork"]
 
@@ -24,12 +24,12 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
     ):
         self.__state = state
         self.__replica = None
-        self.__unit_of_work_memento_cls = unit_of_work_metaclass(registry_=registry)(
+        self.__unit_of_work_memento_cls = unit_of_work_metaclass(registry_=DEFAULT_E_CLASSES_REGISTRY)(
             "UnitOfWorkMemento",
             (UnitOfWorkMemento, ),
             {},
         )
-        self.__query_engine_cls = query_engine_metaclass(registry_=registry)(
+        self.__query_engine_cls = query_engine_metaclass(registry_=DEFAULT_E_CLASSES_REGISTRY)(
             "QueryEngine",
             (),
             {}
@@ -40,7 +40,7 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
         self.__replica = self.__unit_of_work_memento_cls(
             state=self.__state,
         )
-        for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
+        for entity_cls_resolver in DEFAULT_E_CLASSES_REGISTRY.all_configs():  # pylint: disable=unused-variable
             setattr(self, entity_cls_resolver.__tablename__, {})
 
     def save_entity(self, entity):
@@ -61,7 +61,7 @@ class UnitOfWork(OriginatorInterface, metaclass=UnitOfWorkMeta):
         self.__state = deepcopy(self.__replica.state)  # pylint: disable=no-member
         replica_values = {}
 
-        for entity_cls_resolver in registry.all_configs():  # pylint: disable=unused-variable
+        for entity_cls_resolver in DEFAULT_E_CLASSES_REGISTRY.all_configs():  # pylint: disable=unused-variable
             tablename = entity_cls_resolver.__tablename__
             values = deepcopy(getattr(self.__replica, tablename))
             setattr(
