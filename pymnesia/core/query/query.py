@@ -2,8 +2,8 @@
 """
 import re
 from typing import Callable
+from functools import partial
 
-from pymnesia.core.composition import runner
 from pymnesia.core.query.filter.registry import find_filter_function
 from pymnesia.core.query.functions import order_by
 from pymnesia.core.query.runner import QueryRunner
@@ -126,7 +126,7 @@ class Query:
                     filter_args["unit_of_work"] = self.__unit_of_work
                     filter_args["field"] = matched_rel_property.group("rel_property")
                     filter_args["relation"] = self.__entity_class.__conf__.relations[matched_rel_property.group("rel")]
-            filter_funcs.append(runner(
+            filter_funcs.append(partial(
                 filter_func,
                 **filter_args
             ))
@@ -140,7 +140,7 @@ class Query:
         :param key: The property to use for ordering.
         :return: The query to use for chaining.
         """
-        self.__order_by_functions.append(runner(
+        self.__order_by_functions.append(partial(
             order_by,
             direction=direction,
             key=key,
