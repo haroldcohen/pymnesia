@@ -3,6 +3,10 @@
 from pymnesia.core.transaction.transaction import InMemoryTransaction
 from pymnesia.core.unit_of_work.unit_of_work import UnitOfWork
 
+__all__ = [
+    "transaction",
+]
+
 
 def transaction(unit_of_work: UnitOfWork) -> InMemoryTransaction:
     """Returns a transaction for a given unit of work.

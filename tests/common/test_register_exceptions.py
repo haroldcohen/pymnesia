@@ -5,6 +5,7 @@ from uuid import UUID
 import pytest
 from hamcrest import assert_that, equal_to
 
+from pymnesia.api.entities.base import declarative_base
 from pymnesia.core.entities.base import DeclarativeBase
 from pymnesia.core.entities.registry.exceptions.missing_primary_key import MissingPrimaryKeyException
 from pymnesia.core.entities.registry.exceptions.missing_tablename import MissingTablenameException
@@ -12,7 +13,7 @@ from pymnesia.core.entities.registry.exceptions.missing_tablename import Missing
 
 def test_register_entity_without_a_primary_key_should_raise_MissingPrimaryKeyException():
     with pytest.raises(MissingPrimaryKeyException) as exc:
-        class EntityWithoutPrimaryKey(DeclarativeBase):
+        class EntityWithoutPrimaryKey(declarative_base()):
             __tablename__ = "entities"
 
             int_f: int
