@@ -51,7 +51,7 @@ class TestQueryOrderByNumericField:
         ],
         indirect=True,
     )
-    def test_query_fetch_all_should_return_every_entity(
+    def test_query_order_by_and_fetch_should_return_every_entity_in_ordered_manner(
             self,
             entity_cls_params,
             entity_cls,
@@ -63,7 +63,10 @@ class TestQueryOrderByNumericField:
             direction,
             order_by_key,
     ):
-        result = base_query.order_by(direction, order_by_key).fetch()
+        result = base_query.order_by(
+            direction=direction,
+            key=order_by_key,
+        ).fetch()
         sorted_entities = sorted(seeded_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
         assert_that(
             result,
@@ -92,7 +95,7 @@ class TestQueryOrderByStrField:
         ],
         indirect=True,
     )
-    def test_query_and_order_by_should_return_ordered_entities(
+    def test_query_order_by_and_fetch_should_return_every_entity_in_ordered_manner(
             self,
             entity_cls,
             seeds,
@@ -103,7 +106,10 @@ class TestQueryOrderByStrField:
             order_by_key,
             unregister_entity_classes,
     ):
-        result = base_query.order_by(direction, order_by_key).fetch()
+        result = base_query.order_by(
+            direction=direction,
+            key=order_by_key,
+        ).fetch()
         sorted_entities = sorted(seeded_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
         assert_that(
             result,

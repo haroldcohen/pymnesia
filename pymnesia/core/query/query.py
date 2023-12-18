@@ -133,17 +133,17 @@ class Query:
 
         return filter_funcs
 
-    def order_by(self, direction: str, order_by_key: str):
+    def order_by(self, direction: str, key: str):
         """Stores parameters to use for ordering (sorting) a query result by a key.
 
         :param direction: Whether the result should be ordered by in an ascending or descending manner.
-        :param order_by_key: The property to use for ordering.
+        :param key: The property to use for ordering.
         :return: The query to use for chaining.
         """
         self.__order_by_functions.append(runner(
             order_by,
             direction=direction,
-            order_by_key=order_by_key,
+            key=key,
         ))
 
         return self
