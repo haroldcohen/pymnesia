@@ -5,6 +5,11 @@ from typing import Any, Callable
 from pymnesia.core.entities.field import Field, UNDEFINED
 from pymnesia.core.entities.relations import Relation
 
+__all__ = [
+    "field",
+    "relation",
+]
+
 
 def field(
         default: Any = UNDEFINED,
