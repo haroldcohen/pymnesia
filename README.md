@@ -1,6 +1,7 @@
 # Pymnesia
 
-Pymnesia provides with a real in memory database and ORM to be used in unit tests.
+Pymnesia provides with a real in memory database and ORM to be used in unit tests and in staging environment when
+persistence adapters are not available yet.
 This tool is likely to be used within decoupled architecture projects.
 
 ## Overview
@@ -24,10 +25,10 @@ Until a more detailed documentation is released, please refer to the examples be
 ```python
 from uuid import UUID
 
-from pymnesia.core.entities.base import DeclarativeBase
+from pymnesia.api.entities.base import declarative_base
 
 
-class CarEngine(DeclarativeBase):
+class CarEngine(declarative_base()):
     __tablename__ = "car_engines"
 
     id: UUID
@@ -40,10 +41,10 @@ class CarEngine(DeclarativeBase):
 ```python
 from uuid import UUID
 
-from pymnesia.core.entities.base import DeclarativeBase
+from pymnesia.api.entities.base import declarative_base
 
 
-class CarModel(DeclarativeBase):
+class CarModel(declarative_base()):
     __tablename__ = "car_models"
 
     id: UUID
@@ -61,16 +62,16 @@ not).
 ```python
 from uuid import UUID
 
-from pymnesia.core.entities.base import DeclarativeBase
-from pymnesia.core.entities.field import Field
+from pymnesia.api.entities.base import declarative_base
+from pymnesia.api.entities.fields import field, relation
 
 
-class Car(DeclarativeBase):
+class Car(declarative_base()):
     __tablename__ = "cars"
 
     id: UUID
 
-    name: str = Field(default="Peugeot 3008")
+    name: str = field(default="Peugeot 3008")
 
     drivers: List[Driver] = relation(reverse="car_foo")
 ```
@@ -80,21 +81,20 @@ class Car(DeclarativeBase):
 #### Save and commit
 
 ```python
-import time
 from uuid import uuid4
 
-from pymnesia.core.unit_of_work.unit_of_work import UnitOfWork
-from pymnesia.core.transaction.transaction import InMemoryTransaction
+from pymnesia.api.unit_of_work import uow
+from pymnesia.api.command import transaction
 
-unit_of_work = UnitOfWork(state=time.time_ns())
-transaction = InMemoryTransaction(originator=unit_of_work)
+unit_of_work = uow()
+new_transaction = transaction(unit_of_work=unit_of_work)
 
 v12_engine = CarEngine(id=uuid4(), horsepower=400)
 aston_martin = CarModel(id=uuid4(), engine_id=v12_engine.id)
 
 unit_of_work.save_entity(entity=v12_engine)
 unit_of_work.save_entity(entity=aston_martin)
-transaction.commit()
+new_transaction.commit()
 ```
 
 Querying the database for car models will return one car model (The output will be 400).
@@ -107,22 +107,21 @@ for car in unit_of_work.query().cars().fetch():
 #### Rollback
 
 ```python
-import time
 from uuid import uuid4
 
-from pymnesia.core.unit_of_work.unit_of_work import UnitOfWork
-from pymnesia.core.transaction.transaction import InMemoryTransaction
+from pymnesia.api.unit_of_work import uow
+from pymnesia.api.command import transaction
 
-unit_of_work = UnitOfWork(state=time.time_ns())
-transaction = InMemoryTransaction(originator=unit_of_work)
+unit_of_work = uow()
+new_transaction = transaction(unit_of_work=unit_of_work)
 
 v12_engine = CarEngine(id=uuid4(), horsepower=400)
 unit_of_work.save_entity(entity=v12_engine)
-transaction.rollback()
+new_transaction.rollback()
 
 v8_engine = CarEngine(id=uuid4(), horsepower=300)
 unit_of_work.save_entity(entity=v8_engine)
-transaction.commit()
+new_transaction.commit()
 ```
 
 Querying the database for car engines will return the v8 engine alone (The output will be 300).
@@ -145,10 +144,10 @@ For instance, if you declare the entity below:
 ```python
 from uuid import UUID
 
-from pymnesia.core.entities.base import DeclarativeBase
+from pymnesia.api.entities.base import declarative_base
 
 
-class Address(DeclarativeBase):
+class Address(declarative_base()):
     __tablename__ = "addresses"
 
     id: UUID
@@ -316,7 +315,8 @@ WHERE cars.name = 'Peugeot 3008'
 <b><i>Where clause using composition</i></b>
 
 The entities can be queried using composition rather than declarative conditions.
-<b>The example below makes little sense</b>, but this feature can be powerful to make complex queries when operator functions
+<b>The example below makes little sense</b>, but this feature can be powerful to make complex queries when operator
+functions
 are not available to perform the requested
 operation.
 
@@ -361,12 +361,12 @@ for car in unit_of_work.query().car_engines().limit(5).fetch():
 
 #### Order by
 
-You can order by your results specify a direction and a key.
+You can order by your results by specifying a direction and a key.
 
 The query below will order the results on the field 'name' in descending order.
 
 ```python
-for car in unit_of_work.query().cars().order_by("desc", "name").fetch():
+for car in unit_of_work.query().cars().order_by(direction="desc", key="name").fetch():
     # whatever you need to do
     pass
 ```
