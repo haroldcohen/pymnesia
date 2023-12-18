@@ -50,7 +50,10 @@ def fields_conf(
             if related_entity_class_params.owner_rel_api:
                 rel_conf = (
                     rel_conf,
-                    relation(reverse=related_entity_class_params.owner_rel_api.reverse)
+                    relation(
+                        reverse=related_entity_class_params.owner_rel_api.reverse,
+                        is_nullable=related_entity_class_params.owner_rel_api.is_nullable,
+                    )
                 )
             # noinspection PyTypeChecker
             entity_cls_params.fields_conf[related_entity_class_params.single_form] = rel_conf
