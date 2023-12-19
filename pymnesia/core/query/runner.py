@@ -85,7 +85,7 @@ class QueryRunner:
 
         :param args: The query functions to run.
         :param or_function_groups: The or function groups to run.
-        :param order_by_functions: The limit to use.
+        :param order_by_functions: The order by function groups to run.
         :param limit: The limit to use.
         :return: A list of entities
         """
@@ -106,18 +106,22 @@ class QueryRunner:
 
         return results
 
-    def fetch_one(self, *args, or_function_groups: list):
+    def fetch_one(self, *args, or_function_groups: list, order_by_functions: list):
         """Returns the first result of a query based on a series of parameters,
         such as a where clause, an order_by, etc...
 
         :param args: The query functions to run.
         :param or_function_groups: The query functions to run.
+        :param order_by_functions: The order by function groups to run.
         :return: A single entity
         """
         results = self.__entities()
         if args:
             results = self.__run_query_funcs(*args)
         results += self.__run_or_funcs(*or_function_groups)
+        if order_by_functions:
+            compose_order_by_funcs = composite(*order_by_functions)
+            results = compose_order_by_funcs(results)
         result = results[0]
 
         self.__load_relations(entity=result)

@@ -66,6 +66,7 @@ class Query:
         return self.__query_runner.fetch_one(
             *self.__query_functions,
             or_function_groups=self.__or_functions,
+            order_by_functions=self.__order_by_functions,
         )
 
     def where(self, clause: dict):
