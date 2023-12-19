@@ -39,6 +39,9 @@ stability is not guarantied. </i>
 
 Until a more detailed documentation is released, please refer to the examples below for usage.
 
+Please keep in mind that the features will usually be made available through an api import.
+Core classes, functions and such should not be imported and used directly.
+
 ### Entities
 
 #### Declaring a simple entity
