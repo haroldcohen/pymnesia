@@ -2,14 +2,28 @@
 name = "pymnesia"
 version = "0.9.0"
 description = "A (real) in memory database and ORM"
-authors = ["Harold Cohen <me@harold-cohen.com>"]
+authors = [
+    { name = "Harold Cohen", email = "me@harold-cohen.com" }
+]
 license = "MIT"
+requires-python = ">=3.10.6"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Topic :: Software Development :: Testing",
+]
+
+[project.urls]
+Homepage = "https://github.com/haroldcohen/pymnesia"
+Issues = "https://github.com/haroldcohen/pymnesia/issues"
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.10.0"
 pylint = "^3.0.2"
 pytest = "^7.4.2"
 pre-commit = "^3.5.0"
@@ -20,33 +34,3 @@ pytest-mock = "^3.12.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 120
-target-version = ['py37']
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | build
-    | dist
-  )/
-)
-'''
-
-[tool.semantic_release]
-version_source = "commit"
-commit_changes = true
-version_variable = "pyproject.toml:version"
-hvcs = "github"
-upload_to_pypi = false
-upload_to_release = false
-
-[tool.isort]
-line_length = 120
-force_sort_within_sections = true
-include_trailing_comma = true
-multi_line_output = 3
-profile = "black"
