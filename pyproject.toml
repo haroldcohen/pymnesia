@@ -16,7 +16,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/haroldcohen/pymnesia"
 Issues = "https://github.com/haroldcohen/pymnesia/issues"
-Changelog = "https://github.com/haroldcohen/pymnesia/CHANGELOG.md"
+Changelog = "https://github.com/haroldcohen/pymnesia/blob/master/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
