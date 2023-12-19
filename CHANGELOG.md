@@ -15,9 +15,6 @@ Features:
 - query with a where clause
 - query with or clauses
 - query with functional composition
-  <<<<<<< HEAD
-- relational queries
-  =======
 - relational queries
 
 ## 1.0.0-beta.1
