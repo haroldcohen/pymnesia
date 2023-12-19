@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pymnesia"
-version = "1.0.1-beta"
+version = "1.0.1-beta.1"
 description = "A (real) in memory database and ORM"
 authors = ["Harold Cohen <me@harold-cohen.com>"]
 license = "MIT"
