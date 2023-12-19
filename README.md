@@ -9,10 +9,29 @@ This tool is likely to be used within decoupled architecture projects.
 The current version is beta, but the project is stable and offers a wide range of features that can already be used in
 your projects :
 
-- Declare entities with various field types (int, str, float, bool, date, one to one relation, one to many relation)
+- Declare entities with various field types (For a complete list, please refer to the table below.)
 - Save entities in an in memory database
 - Commit and rollback
 - Query stored entities using a very lightweight api and intuitive syntax
+
+|                       | Supported for declaration | Supported for query |
+|-----------------------|---------------------------|---------------------|
+| int                   | yes &#x2611;              | yes &#x2611;        |
+| float                 | yes &#x2611;              | yes &#x2611;        |
+| str                   | yes &#x2611;              | yes &#x2611;        |
+| bool                  | yes &#x2611;              | yes &#x2611;        |
+| date                  | not officially            | not officially      |
+| datetime              | not officially            | not officially      |
+| tuple                 | yes &#x2611;              | not officially      |
+| list                  | no &#x2612;               | no &#x2612;         |
+| dict                  | not officially            | no &#x2612;         |
+| one to one relation   | yes &#x2611;              | yes &#x2611;        |
+| one to many relation  | yes &#x2611;              | yes &#x2611;        |
+| many to one relation  | no &#x2612;               | no &#x2612;         |
+| many to many relation | no &#x2612;               | no &#x2612;         |
+
+<i>not officially supported: The feature should work but may not be fully functional (querying for instance) and
+stability is not guarantied. </i>
 
 ## Basic user documentation
 
@@ -44,8 +63,8 @@ from uuid import UUID
 from pymnesia.api.entities.base import declarative_base
 
 
-class CarModel(declarative_base()):
-    __tablename__ = "car_models"
+class Car(declarative_base()):
+    __tablename__ = "cars"
 
     id: UUID
 
@@ -73,7 +92,9 @@ class Car(declarative_base()):
 
     name: str = field(default="Peugeot 3008")
 
-    drivers: List[Driver] = relation(reverse="car_foo")
+    engine: CarEngine
+
+    drivers: List[Driver] = relation(reverse="a_list_of_drivers")
 ```
 
 ### Command
