@@ -2,11 +2,8 @@
 name = "pymnesia"
 version = "0.9.0"
 description = "A (real) in memory database and ORM"
-authors = [
-    { name = "Harold Cohen", email = "me@harold-cohen.com" }
-]
+authors = ["Harold Cohen <me@harold-cohen.com>"]
 license = "MIT"
-requires-python = ">=3.10.6"
 
 classifiers = [
     "Programming Language :: Python :: 3",
