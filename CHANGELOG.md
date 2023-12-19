@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-## 1.0.0-beta (unreleased)
+## 1.0.0-beta
 
 Features:
 
@@ -16,3 +16,10 @@ Features:
  - query with or clauses
  - query with functional composition
  - relational queries
+
+## 1.0.0-beta.1
+
+Build:
+
+ - Add repository to pyproject.toml
+
