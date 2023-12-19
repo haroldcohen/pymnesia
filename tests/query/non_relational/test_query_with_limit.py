@@ -51,6 +51,6 @@ class TestQueryWithLimit:
     ):
         result = base_query.limit(limit).fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(expected_entities)
         )

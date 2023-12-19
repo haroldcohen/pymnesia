@@ -88,6 +88,6 @@ class TestOneToOneRelationalQueryFetch:
     ):
         result = base_query.fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(seeded_entities)
         )

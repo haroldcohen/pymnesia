@@ -92,7 +92,7 @@ class TestQueryWithNumericWhereClause:
     ):
         result = base_query.where(where_clause).fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(expected_entities)
         )
 
@@ -158,7 +158,7 @@ class TestQueryWithNumericWhereClause:
     ):
         result = base_query.where(where_clause).fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(expected_entities)
         )
 
@@ -213,6 +213,6 @@ class TestQueryWithStrWhereClause:
     ):
         result = base_query.where(where_clause).fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(expected_entities)
         )
