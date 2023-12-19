@@ -4,6 +4,7 @@ version = "1.0.0-beta"
 description = "A (real) in memory database and ORM"
 authors = ["Harold Cohen <me@harold-cohen.com>"]
 license = "MIT"
+readme = "README.md"
 
 classifiers = [
     "Programming Language :: Python :: 3",
