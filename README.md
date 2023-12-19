@@ -2,7 +2,7 @@
 
 Pymnesia provides with a real in memory database and ORM to be used in unit tests and in staging environment when
 persistence adapters are not available yet.
-This tool is likely to be used within decoupled architecture projects.
+This tool is likely to be used within decoupled architectures.
 
 ## Overview
 
@@ -13,6 +13,8 @@ your projects :
 - Save entities in an in memory database
 - Commit and rollback
 - Query stored entities using a very lightweight api and intuitive syntax
+
+### Fields support
 
 |                       | Supported for declaration | Supported for query |
 |-----------------------|---------------------------|---------------------|
