@@ -115,3 +115,35 @@ class TestQueryOrderByStrField:
             result,
             equal_to(sorted_entities)
         )
+
+    @pytest.mark.parametrize(
+        "seeds, direction, order_by_key",
+        [
+            (
+                    generate_seeds(1, {"id": uuid4, "str_f": "b"}) + generate_seeds(1, {"id": uuid4, "str_f": "a"}),
+                    "asc",
+                    "str_f",
+            ),
+        ],
+        indirect=True,
+    )
+    def test_query_order_by_and_fetch_one_should_return_every_entity_in_ordered_manner(
+            self,
+            entity_cls,
+            seeds,
+            seeded_entities,
+            unit_of_work,
+            base_query,
+            direction,
+            order_by_key,
+            unregister_entity_classes,
+    ):
+        result = base_query.order_by(
+            direction=direction,
+            key=order_by_key,
+        ).fetch_one()
+        sorted_entities = sorted(seeded_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
+        assert_that(
+            result,
+            equal_to(sorted_entities[0])
+        )
