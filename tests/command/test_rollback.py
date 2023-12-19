@@ -89,7 +89,7 @@ def test_save_one_or_more_entities_and_rollback_should_restore_the_unit_of_work_
     # Assert
     result = base_query.where({"id": entity.id}).fetch()
     assert_that(
-        result,
+        list(result),
         equal_to([])
     )
     for rel_entity in rel_entities:
@@ -98,6 +98,6 @@ def test_save_one_or_more_entities_and_rollback_should_restore_the_unit_of_work_
             rel_entity.__tablename__,
         )().where({"id": rel_entity.id}).fetch()
         assert_that(
-            retrieved_rel_entity,
+            list(retrieved_rel_entity),
             equal_to([])
         )

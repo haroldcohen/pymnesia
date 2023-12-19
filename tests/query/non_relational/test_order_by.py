@@ -69,7 +69,7 @@ class TestQueryOrderByNumericField:
         ).fetch()
         sorted_entities = sorted(seeded_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
         assert_that(
-            result,
+            list(result),
             equal_to(sorted_entities)
         )
 
@@ -112,7 +112,7 @@ class TestQueryOrderByStrField:
         ).fetch()
         sorted_entities = sorted(seeded_entities, key=lambda e: getattr(e, order_by_key), reverse=direction == "desc")
         assert_that(
-            result,
+            list(result),
             equal_to(sorted_entities)
         )
 

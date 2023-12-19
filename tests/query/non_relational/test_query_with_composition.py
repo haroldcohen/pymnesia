@@ -64,6 +64,6 @@ class TestQueryWithComposition:
 
         result = base_query.where_with_composition([partial_banana_func]).fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(expected_entities)
         )

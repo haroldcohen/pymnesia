@@ -81,6 +81,6 @@ class TestOneToOneRelationalQueryWithWhereOrClause:
             query.or_(or_clause)
         result = query.fetch()
         assert_that(
-            result,
+            list(result),
             equal_to(expected_entities)
         )

@@ -1,9 +1,10 @@
 """Provides with Query class.
 """
 import re
-from typing import Callable
+from typing import Callable, Generator
 from functools import partial
 
+from pymnesia.core.entities.entity import Entity
 from pymnesia.core.query.filter.registry import find_filter_function
 from pymnesia.core.query.functions import order_by
 from pymnesia.core.query.runner import QueryRunner
@@ -44,18 +45,19 @@ class Query:
         self.__or_functions = []
         self.__order_by_functions = []
 
-    def fetch(self) -> list:
+    def fetch(self) -> Generator[Entity, None, None]:
         """Returns multiple results based on a series of parameters,
         such as a where clause, a limit, and order_by, etc...
 
         :return: A list of entities
         """
-        return self.__query_runner.fetch(
+        for entity in self.__query_runner.fetch(
             *self.__query_functions,
             or_function_groups=self.__or_functions,
             order_by_functions=self.__order_by_functions,
             limit=self.__limit
-        )
+        ):
+            yield entity
 
     def fetch_one(self):
         """Returns the first result of a query based on a series of parameters,
