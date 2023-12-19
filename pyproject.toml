@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pymnesia"
-version = "1.0.0-beta"
+version = "1.0.1-beta.1"
 description = "A (real) in memory database and ORM"
 authors = ["Harold Cohen <me@harold-cohen.com>"]
 license = "MIT"
@@ -16,6 +16,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/haroldcohen/pymnesia"
+Repository = "https://github.com/haroldcohen/pymnesia"
 Issues = "https://github.com/haroldcohen/pymnesia/issues"
 Changelog = "https://github.com/haroldcohen/pymnesia/blob/master/CHANGELOG.md"
 
