@@ -23,3 +23,9 @@ Build:
 
 - Add repository to pyproject.toml
 
+## 1.0.0-beta.2
+
+Build:
+
+- Update pyproject.toml
+
